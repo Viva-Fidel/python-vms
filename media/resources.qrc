@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="media">
+    <file>icons/analytics.svg</file>
+    <file>icons/cameras.svg</file>
+    <file>icons/dashboard.svg</file>
+    <file>icons/settings.svg</file>
+  </qresource>
+</RCC>
