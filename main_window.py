@@ -10,20 +10,22 @@
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt, QTimer)
+    QSize, QTime, QTimer, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QLCDNumber, QLayout, QMainWindow,
-    QPushButton, QSizePolicy, QStackedWidget, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QLCDNumber, QLayout, QListView,
+    QMainWindow, QPushButton, QSizePolicy, QStackedWidget,
+    QVBoxLayout, QWidget, QDialog)
 
 import GPUtil
 import psutil
 import resources
 import asyncio
 from time import strftime
+
+from add_new_camera import Ui_Add_new_cam_dialog
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -35,15 +37,15 @@ class Ui_MainWindow(object):
         self.left_menu_widget = QWidget(self.centralwidget)
         self.left_menu_widget.setObjectName(u"left_menu_widget")
         self.left_menu_widget.setGeometry(QRect(0, 0, 41, 591))
-        self.widget = QWidget(self.left_menu_widget)
-        self.widget.setObjectName(u"widget")
-        self.widget.setGeometry(QRect(0, 0, 41, 130))
-        self.verticalLayout = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(self.left_menu_widget)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.layoutWidget.setGeometry(QRect(0, 0, 41, 130))
+        self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.dashboard_btn = QPushButton(self.widget)
+        self.dashboard_btn = QPushButton(self.layoutWidget)
         self.dashboard_btn.setObjectName(u"dashboard_btn")
         icon = QIcon()
         icon.addFile(u":/media/icons/dashboard.svg", QSize(), QIcon.Normal, QIcon.Off)
@@ -54,7 +56,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.dashboard_btn)
 
-        self.cameras_btn = QPushButton(self.widget)
+        self.cameras_btn = QPushButton(self.layoutWidget)
         self.cameras_btn.setObjectName(u"cameras_btn")
         icon1 = QIcon()
         icon1.addFile(u":/media/icons/cameras.svg", QSize(), QIcon.Normal, QIcon.Off)
@@ -65,7 +67,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.cameras_btn)
 
-        self.settings_btn = QPushButton(self.widget)
+        self.settings_btn = QPushButton(self.layoutWidget)
         self.settings_btn.setObjectName(u"settings_btn")
         icon2 = QIcon()
         icon2.addFile(u":/media/icons/settings.svg", QSize(), QIcon.Normal, QIcon.Off)
@@ -76,7 +78,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.settings_btn)
 
-        self.analytics_btn = QPushButton(self.widget)
+        self.analytics_btn = QPushButton(self.layoutWidget)
         self.analytics_btn.setObjectName(u"analytics_btn")
         icon3 = QIcon()
         icon3.addFile(u":/media/icons/analytics.svg", QSize(), QIcon.Normal, QIcon.Off)
@@ -122,6 +124,12 @@ class Ui_MainWindow(object):
         self.main_windows_stackedWidget.addWidget(self.cameras_page)
         self.settings_page = QWidget()
         self.settings_page.setObjectName(u"settings_page")
+        self.settings_listView = QListView(self.settings_page)
+        self.settings_listView.setObjectName(u"settings_listView")
+        self.settings_listView.setGeometry(QRect(0, 0, 741, 551))
+        self.add_new_cam_btn = QPushButton(self.settings_page)
+        self.add_new_cam_btn.setObjectName(u"add_new_cam_btn")
+        self.add_new_cam_btn.setGeometry(QRect(10, 560, 75, 23))
         self.main_windows_stackedWidget.addWidget(self.settings_page)
         self.analytics_page = QWidget()
         self.analytics_page.setObjectName(u"analytics_page")
@@ -134,6 +142,8 @@ class Ui_MainWindow(object):
         self.cameras_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(1))
         self.settings_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(2))
         self.analytics_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(3))
+
+        self.add_new_cam_btn.clicked.connect(self.add_new_cam_dialog)
 
 
         timer = QTimer(self, interval=1000, timeout=self.update_dashboard)
@@ -154,10 +164,19 @@ class Ui_MainWindow(object):
         self.ram_load_lcdNumber.display(psutil.virtual_memory().percent)  # show RAM load
         self.gpu_load_lcdNumber.display(GPUtil.getGPUs()[0].load) #show GPU load
 
+    def add_new_cam_dialog(self):
+        Dialog = QDialog()
+        adding_new_cam = Ui_Add_new_cam_dialog()
+        adding_new_cam.setupUi(Dialog)
+        Dialog.show()
+        Dialog.exec()
+
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.dashboard_btn.setText("")
         self.cameras_btn.setText("")
         self.settings_btn.setText("")
         self.analytics_btn.setText("")
+        self.add_new_cam_btn.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
     # retranslateUi

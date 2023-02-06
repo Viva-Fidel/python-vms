@@ -23,7 +23,7 @@
       <height>591</height>
      </rect>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -143,6 +143,9 @@
       <height>591</height>
      </rect>
     </property>
+    <property name="currentIndex">
+     <number>2</number>
+    </property>
     <widget class="QWidget" name="dashboard_page">
      <widget class="QWidget" name="clock_widget" native="true">
       <property name="geometry">
@@ -226,7 +229,31 @@
      </widget>
     </widget>
     <widget class="QWidget" name="cameras_page"/>
-    <widget class="QWidget" name="settings_page"/>
+    <widget class="QWidget" name="settings_page">
+     <widget class="QListView" name="settings_listView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>741</width>
+        <height>551</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="add_new_cam_btn">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>560</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add camera</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="analytics_page"/>
    </widget>
   </widget>
