@@ -1,6 +1,7 @@
 import sys
 from PySide6 import QtWidgets
 import main_window
+import asyncio
 
 class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def __init__(self):

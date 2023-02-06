@@ -10,7 +10,7 @@
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+    QSize, QTime, QUrl, Qt, QTimer)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
@@ -18,9 +18,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QLCDNumber, QLayout, QMainWindow,
     QPushButton, QSizePolicy, QStackedWidget, QVBoxLayout,
     QWidget)
+
+import GPUtil
 import psutil
 import resources
-from time import gmtime, strftime
+import asyncio
+from time import strftime
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -95,21 +98,24 @@ class Ui_MainWindow(object):
         self.clock_lcdNumber = QLCDNumber(self.clock_widget)
         self.clock_lcdNumber.setObjectName(u"clock_lcdNumber")
         self.clock_lcdNumber.setGeometry(QRect(3, 2, 111, 71))
-        self.clock_lcdNumber.display(strftime("%H:%M")) # show locaL time
         self.cpu_load_widget = QWidget(self.dashboard_page)
         self.cpu_load_widget.setObjectName(u"cpu_load_widget")
         self.cpu_load_widget.setGeometry(QRect(150, 40, 120, 80))
         self.cpu_load_lcdNumber = QLCDNumber(self.cpu_load_widget)
         self.cpu_load_lcdNumber.setObjectName(u"cpu_load_lcdNumber")
         self.cpu_load_lcdNumber.setGeometry(QRect(3, 2, 111, 71))
-        self.cpu_load_lcdNumber.display(psutil.cpu_percent(interval=None)) # show CPU load
         self.ram_load_widget = QWidget(self.dashboard_page)
-        self.ram_load_widget.setObjectName(u"gpu_load_widget")
+        self.ram_load_widget.setObjectName(u"ram_load_widget")
         self.ram_load_widget.setGeometry(QRect(280, 40, 120, 80))
         self.ram_load_lcdNumber = QLCDNumber(self.ram_load_widget)
-        self.ram_load_lcdNumber.setObjectName(u"gpu_load_lcdNumber")
+        self.ram_load_lcdNumber.setObjectName(u"ram_load_lcdNumber")
         self.ram_load_lcdNumber.setGeometry(QRect(3, 2, 111, 71))
-        self.ram_load_lcdNumber.display(psutil.virtual_memory().percent) # show RAM load
+        self.gpu_load_widget = QWidget(self.dashboard_page)
+        self.gpu_load_widget.setObjectName(u"gpu_load_widget")
+        self.gpu_load_widget.setGeometry(QRect(410, 40, 120, 80))
+        self.gpu_load_lcdNumber = QLCDNumber(self.gpu_load_widget)
+        self.gpu_load_lcdNumber.setObjectName(u"gpu_load_lcdNumber")
+        self.gpu_load_lcdNumber.setGeometry(QRect(3, 2, 111, 71))
         self.main_windows_stackedWidget.addWidget(self.dashboard_page)
         self.cameras_page = QWidget()
         self.cameras_page.setObjectName(u"cameras_page")
@@ -120,6 +126,19 @@ class Ui_MainWindow(object):
         self.analytics_page = QWidget()
         self.analytics_page.setObjectName(u"analytics_page")
         self.main_windows_stackedWidget.addWidget(self.analytics_page)
+        MainWindow.setCentralWidget(self.centralwidget)
+
+
+        self.main_windows_stackedWidget.setCurrentIndex(0)
+        self.dashboard_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(0))
+        self.cameras_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(1))
+        self.settings_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(2))
+        self.analytics_btn.clicked.connect(lambda: self.main_windows_stackedWidget.setCurrentIndex(3))
+
+
+        timer = QTimer(self, interval=1000, timeout=self.update_dashboard)
+        timer.start()
+        self.update_dashboard()
 
 
         MainWindow.setCentralWidget(self.centralwidget)
@@ -129,6 +148,12 @@ class Ui_MainWindow(object):
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
 
+    def update_dashboard(self):
+        self.clock_lcdNumber.display(strftime("%H:%M"))  # show locaL time
+        self.cpu_load_lcdNumber.display(psutil.cpu_percent(interval=1))  # show CPU load
+        self.ram_load_lcdNumber.display(psutil.virtual_memory().percent)  # show RAM load
+        self.gpu_load_lcdNumber.display(GPUtil.getGPUs()[0].load) #show GPU load
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.dashboard_btn.setText("")
@@ -136,4 +161,3 @@ class Ui_MainWindow(object):
         self.settings_btn.setText("")
         self.analytics_btn.setText("")
     # retranslateUi
-
