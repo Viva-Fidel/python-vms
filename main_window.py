@@ -22,10 +22,11 @@ from PySide6.QtWidgets import (QApplication, QLCDNumber, QLayout, QListView,
 import GPUtil
 import psutil
 import resources
-import asyncio
+
+from threading import Thread
 from time import strftime
 
-from add_new_camera import Ui_Add_new_cam_dialog
+from add_new_camera_dialog import Ui_Add_new_cam_dialog
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -145,10 +146,12 @@ class Ui_MainWindow(object):
 
         self.add_new_cam_btn.clicked.connect(self.add_new_cam_dialog)
 
+        # self.dashboard_thread = Thread(target=self.update_dashboard, args=())
+        # self.dashboard_thread.daemon = True
+        # self.dashboard_thread.start()
 
         timer = QTimer(self, interval=1000, timeout=self.update_dashboard)
         timer.start()
-        self.update_dashboard()
 
 
         MainWindow.setCentralWidget(self.centralwidget)
@@ -157,6 +160,15 @@ class Ui_MainWindow(object):
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
+
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        self.dashboard_btn.setText("")
+        self.cameras_btn.setText("")
+        self.settings_btn.setText("")
+        self.analytics_btn.setText("")
+        self.add_new_cam_btn.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
+    # retranslateUi
 
     def update_dashboard(self):
         self.clock_lcdNumber.display(strftime("%H:%M"))  # show locaL time
@@ -170,13 +182,3 @@ class Ui_MainWindow(object):
         adding_new_cam.setupUi(Dialog)
         Dialog.show()
         Dialog.exec()
-
-
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.dashboard_btn.setText("")
-        self.cameras_btn.setText("")
-        self.settings_btn.setText("")
-        self.analytics_btn.setText("")
-        self.add_new_cam_btn.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
-    # retranslateUi
