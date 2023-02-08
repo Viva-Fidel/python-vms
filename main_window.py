@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
@@ -9,15 +8,16 @@
 ################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QTimer, QUrl, Qt)
+                            QMetaObject, QObject, QPoint, QRect,
+                            QSize, QTime, QTimer, QUrl, Qt, Slot, QThread, Signal)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QLCDNumber, QLayout, QListView,
-    QMainWindow, QPushButton, QSizePolicy, QStackedWidget,
-    QVBoxLayout, QWidget, QDialog)
+                               QMainWindow, QPushButton, QSizePolicy, QStackedWidget,
+                               QVBoxLayout, QWidget, QDialog, QGridLayout)
+from PySide6 import QtCore
 
 import GPUtil
 import psutil
@@ -27,6 +27,7 @@ from threading import Thread
 from time import strftime
 
 from add_new_camera_dialog import Ui_Add_new_cam_dialog
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -122,6 +123,13 @@ class Ui_MainWindow(object):
         self.main_windows_stackedWidget.addWidget(self.dashboard_page)
         self.cameras_page = QWidget()
         self.cameras_page.setObjectName(u"cameras_page")
+        self.gridLayoutWidget = QWidget(self.cameras_page)
+        self.gridLayoutWidget.setObjectName(u"gridLayoutWidget")
+        self.gridLayoutWidget.setGeometry(QRect(0, 0, 741, 591))
+        self.cameras_page_gridLayout = QGridLayout(self.gridLayoutWidget)
+        self.cameras_page_gridLayout.setSpacing(0)
+        self.cameras_page_gridLayout.setObjectName(u"cameras_page_gridLayout")
+        self.cameras_page_gridLayout.setContentsMargins(0, 0, 0, 0)
         self.main_windows_stackedWidget.addWidget(self.cameras_page)
         self.settings_page = QWidget()
         self.settings_page.setObjectName(u"settings_page")
@@ -150,9 +158,9 @@ class Ui_MainWindow(object):
         # self.dashboard_thread.daemon = True
         # self.dashboard_thread.start()
 
+
         timer = QTimer(self, interval=1000, timeout=self.update_dashboard)
         timer.start()
-
 
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -170,11 +178,6 @@ class Ui_MainWindow(object):
         self.add_new_cam_btn.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
     # retranslateUi
 
-    def update_dashboard(self):
-        self.clock_lcdNumber.display(strftime("%H:%M"))  # show locaL time
-        self.cpu_load_lcdNumber.display(psutil.cpu_percent(interval=1))  # show CPU load
-        self.ram_load_lcdNumber.display(psutil.virtual_memory().percent)  # show RAM load
-        self.gpu_load_lcdNumber.display(GPUtil.getGPUs()[0].load) #show GPU load
 
     def add_new_cam_dialog(self):
         Dialog = QDialog()
@@ -182,3 +185,12 @@ class Ui_MainWindow(object):
         adding_new_cam.setupUi(Dialog)
         Dialog.show()
         Dialog.exec()
+
+    def update_dashboard(self):
+        self.clock_lcdNumber.display(strftime("%H:%M"))  # show locaL time
+        self.cpu_load_lcdNumber.display(psutil.cpu_percent(interval=None))  # show CPU load
+        self.ram_load_lcdNumber.display(psutil.virtual_memory().percent)  # show RAM load
+        self.gpu_load_lcdNumber.display(GPUtil.getGPUs()[0].load)  # show GPU load
+
+
+

@@ -9,8 +9,8 @@
 ################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+                            QMetaObject, QObject, QPoint, QRect,
+                            QSize, QTime, QUrl, Qt, Signal)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
@@ -19,9 +19,12 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog
     QDialogButtonBox, QLabel, QLineEdit, QSizePolicy,
     QSpinBox, QWidget)
 
-from camera import Camera
+from add_new_camera_event import Newcamera
 
 class Ui_Add_new_cam_dialog(object):
+
+    signal = Signal(str)
+
     def setupUi(self, Add_new_cam_dialog):
         if not Add_new_cam_dialog.objectName():
             Add_new_cam_dialog.setObjectName(u"Add_new_cam_dialog")
@@ -102,5 +105,5 @@ class Ui_Add_new_cam_dialog(object):
 
     def add_new_camera(self):
         if self.rtsp_checkBox.isChecked():
-            new_camera = Camera(self.rtsp_link_lineEdit.text(), self.rtsp_device_name_lineEdit.text())
-            new_camera.start()
+            new_camera = Newcamera(self.rtsp_link_lineEdit.text(), self.rtsp_device_name_lineEdit.text())
+            self.cameras_page_gridLayout.addWidget(new_camera.add_new_camera())

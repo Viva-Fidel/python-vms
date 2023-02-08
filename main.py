@@ -7,7 +7,6 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = Vms()

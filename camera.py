@@ -3,35 +3,37 @@ import time
 
 from threading import Thread
 
-class Camera:
+from PySide6.QtCore import QThread, Signal
+from PySide6.QtGui import QImage
 
-    list_of_all_cameras = []
 
-    def __init__(self, camera_url, camera_name):
+class Camera(QThread):
+
+    ImageUpdated = Signal(QImage)
+
+    def __init__(self, camera_url):
+        super(Camera, self).__init__()
+
         self.camera_url = camera_url
-        self.camera_name = camera_name
         self.prev_frame_time = 0
         self.camera_thread = Thread(target=self.run_camera, args=())
         self.camera_thread.daemon = True
-
         self.fps = 0
         self.true_fps = 0
-        self.height = 0
-        self.width = 0
-
-        Camera.list_of_all_cameras.append(self)
 
     def start(self):
         self.camera_thread.start()
 
     def run_camera(self):
         cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
+        #cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
+
         if cap.isOpened()== True:
             while (cap.isOpened()):
                 ret, frame = cap.read()
                 self.true_fps = cap.get(cv2.CAP_PROP_FPS)
-                self.height = frame.shape[0]
-                self.width = frame.shape[1]
+                self.height, self.width, self.channels = frame.shape
+                bytes_per_line = self.height * self.channels
 
                 new_frame_time = time.time()
                 try:
@@ -41,16 +43,16 @@ class Camera:
                     pass
                 self.fps = int(fps)
 
+                time.sleep(fps)
+
+                cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                qt_rgb_image = QImage(cv_rgb_image.data, self.width, self.height, bytes_per_line, QImage.Format_RGB888)
+
                 self.height = str(self.height)
                 self.width = str(self.width)
 
-                if time.localtime().tm_sec == 0:
-                    self.update_data()
-
-                cv2.imshow("Detector", frame)
-
-                if cv2.waitKey(int((1 / int(self.true_fps)) * 1000)) == ord('q'):
-                    break
+                self.ImageUpdated.emit(qt_rgb_image)
 
         cap.release()
 
