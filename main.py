@@ -1,10 +1,14 @@
-import sys
 from PySide6 import QtWidgets
+
+import sys
+
 import main_window
 
 class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.actual_index = 0
+        self.rtsp_index = 1
         self.setupUi(self)
 
 def main():

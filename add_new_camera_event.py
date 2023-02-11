@@ -1,15 +1,16 @@
-from IPython.external.qt_for_kernel import QtCore
-from PySide6.QtGui import QPalette, QImage, QPixmap
-from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel
+from PySide6.QtCore import QThread, Slot
+from PySide6.QtGui import QPalette, QImage, QPixmap, Qt
+from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel, QHBoxLayout, QVBoxLayout
 
 from camera import Camera
 
 class Newcamera:
     def __init__(self, camera_url, camera_name):
+        super().__init__()
         self.camera_url = camera_url
         self.camera_name = camera_name
 
-    def add_new_camera(self):
+    def add_new_new_camera(self):
         self.camera = QLabel()
         self.camera.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.camera.setScaledContents(True)
@@ -19,10 +20,11 @@ class Newcamera:
         self.QScrollArea.setWidgetResizable(True)
         self.QScrollArea.setWidget(self.camera)
 
-        self.CaptureIpCameraFramesWorker = Camera(self.camera_url)
-        self.CaptureIpCameraFramesWorker.ImageUpdated.connect(lambda image: self.show_camera(image))
-        self.CaptureIpCameraFramesWorker.start()
+        self.capture_camera = Camera(self.camera_url)
+        self.capture_camera.ImageUpdated.connect(lambda image: self.ShowCamera(image))
+        self.capture_camera.start()
+        return self.QScrollArea
 
-    @QtCore.Slot()
-    def show_camera(self, frame: QImage):
+    @Slot()
+    def ShowCamera(self, frame: QImage):
         self.camera.setPixmap(QPixmap.fromImage(frame))

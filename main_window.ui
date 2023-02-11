@@ -14,218 +14,148 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="left_menu_widget" native="true">
+   <widget class="QTreeView" name="left_menu_treeView">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>41</width>
+      <x>10</x>
+      <y>1</y>
+      <width>111</width>
       <height>591</height>
      </rect>
     </property>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>41</width>
-       <height>130</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
-      </property>
-      <item>
-       <widget class="QPushButton" name="dashboard_btn">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="media/resources.qrc">
-          <normaloff>:/media/icons/dashboard.svg</normaloff>:/media/icons/dashboard.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoExclusive">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cameras_btn">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="media/resources.qrc">
-          <normaloff>:/media/icons/cameras.svg</normaloff>:/media/icons/cameras.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoExclusive">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="settings_btn">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="media/resources.qrc">
-          <normaloff>:/media/icons/settings.svg</normaloff>:/media/icons/settings.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoExclusive">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="analytics_btn">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="media/resources.qrc">
-          <normaloff>:/media/icons/analytics.svg</normaloff>:/media/icons/analytics.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoExclusive">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+    <property name="headerHidden">
+     <bool>true</bool>
+    </property>
    </widget>
-   <widget class="QStackedWidget" name="main_windows_stackedWidget">
+   <widget class="QStackedWidget" name="main_window_stackedWidget">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>130</x>
       <y>0</y>
-      <width>751</width>
+      <width>661</width>
       <height>591</height>
      </rect>
-    </property>
-    <property name="currentIndex">
-     <number>1</number>
     </property>
     <widget class="QWidget" name="dashboard_page">
-     <widget class="QWidget" name="clock_widget" native="true">
+     <widget class="QLabel" name="software_version_label">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>40</y>
-        <width>120</width>
-        <height>80</height>
+        <x>10</x>
+        <y>10</y>
+        <width>131</width>
+        <height>16</height>
        </rect>
       </property>
-      <widget class="QLCDNumber" name="clock_lcdNumber">
+      <property name="text">
+       <string>Software version: 0.01a</string>
+      </property>
+     </widget>
+     <widget class="QFrame" name="system_parameters_frame">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>70</y>
+        <width>241</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QLabel" name="cpu_load_label">
        <property name="geometry">
         <rect>
-         <x>3</x>
-         <y>2</y>
-         <width>111</width>
-         <height>71</height>
+         <x>0</x>
+         <y>10</y>
+         <width>71</width>
+         <height>16</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>CPU load:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="ram_load_label">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>30</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>RAM load:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="gpu_load_label">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>50</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>GPU load:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="cpu_load_info_label">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>10</y>
+         <width>47</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="ram_load_info_label">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>30</y>
+         <width>47</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="gpu_load_info_label">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>50</y>
+         <width>47</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0</string>
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="cpu_load_widget" native="true">
+     <widget class="QLabel" name="system_parameters_label">
       <property name="geometry">
        <rect>
-        <x>150</x>
-        <y>40</y>
-        <width>120</width>
-        <height>80</height>
+        <x>10</x>
+        <y>50</y>
+        <width>111</width>
+        <height>16</height>
        </rect>
       </property>
-      <widget class="QLCDNumber" name="cpu_load_lcdNumber">
-       <property name="geometry">
-        <rect>
-         <x>3</x>
-         <y>2</y>
-         <width>111</width>
-         <height>71</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="ram_load_widget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>40</y>
-        <width>120</width>
-        <height>80</height>
-       </rect>
+      <property name="text">
+       <string>System parameters:</string>
       </property>
-      <widget class="QLCDNumber" name="ram_load_lcdNumber">
-       <property name="geometry">
-        <rect>
-         <x>3</x>
-         <y>2</y>
-         <width>111</width>
-         <height>71</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="gpu_load_widget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>410</x>
-        <y>40</y>
-        <width>120</width>
-        <height>80</height>
-       </rect>
-      </property>
-      <widget class="QLCDNumber" name="gpu_load_lcdNumber">
-       <property name="geometry">
-        <rect>
-         <x>3</x>
-         <y>2</y>
-         <width>111</width>
-         <height>71</height>
-        </rect>
-       </property>
-      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="cameras_page">
@@ -234,11 +164,11 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>741</width>
+        <width>661</width>
         <height>591</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="cameras_page_gridLayout">
+      <layout class="QGridLayout" name="cameras_gridLayout">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -246,20 +176,10 @@
      </widget>
     </widget>
     <widget class="QWidget" name="settings_page">
-     <widget class="QListView" name="settings_listView">
+     <widget class="QPushButton" name="add_camera_pushButton">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>741</width>
-        <height>551</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="add_new_cam_btn">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
         <y>560</y>
         <width>75</width>
         <height>23</height>
@@ -269,8 +189,194 @@
        <string>Add camera</string>
       </property>
      </widget>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>661</width>
+        <height>551</height>
+       </rect>
+      </property>
+      <widget class="QWidget" name="rtsp_page">
+       <widget class="QLabel" name="rtsp_device_name_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>71</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Device name:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="rtsp_device_name_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>221</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="rtsp_stream_url_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>71</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Stream URL:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="rtsp_stream_url_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>221</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="rtsp_enable_pushButton">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>120</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="rtsp_delete_pushButton">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>120</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delete</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="rtsp_status_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>100</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="rtsp_actual_status_label">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>100</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disabled</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="webcam_page">
+       <widget class="QLabel" name="webcam_device_name_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>71</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Device name:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="webcam_device_name_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>221</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="webcam_enable_pushButton">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="webcam_delete_pushButton">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>80</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delete</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="webcam_status_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>60</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="webcam_actual_status_label">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>60</y>
+          <width>47</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disabled</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
     </widget>
-    <widget class="QWidget" name="analytics_page"/>
    </widget>
   </widget>
  </widget>
