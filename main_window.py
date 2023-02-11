@@ -27,11 +27,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from add_new_camera_dialog import Ui_Add_new_cam_dialog
+from add_new_camera_event import Newcamera
 
 import resources
 
+
 class Ui_MainWindow(object):
     def __init__(self):
+        super().__init__()
         self.actual_index = 0
         self.rtsp_index = 1
 
@@ -133,14 +136,20 @@ class Ui_MainWindow(object):
         dashboard_timer.start()
 
         "____________________________________________________"
+        # Dialo to add new cameras
 
         self.add_new_camera_pushButton.clicked.connect(self.add_new_cam_dialog)
+
+        #self.cameras_page_gridLayout.clicked.connect(self.update)
 
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
+    @Slot(QObject, QWidget, int, int)
+    def update_print(self, value1, value2, value3):
+        self.cameras_page_gridLayout.addWidget(value1, value2, value3)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
@@ -156,9 +165,9 @@ class Ui_MainWindow(object):
     # retranslateUi
 
     def update_dashboard(self):
-        self.cpu_load_info_label.setText(str(psutil.cpu_percent(interval=None)))
-        self.ram_load_info_label.setText(str(psutil.virtual_memory().percent))
-        self.gpu_load_info_label.setText((str(GPUtil.getGPUs()[0].load)))
+        self.cpu_load_info_label.setText(str(psutil.cpu_percent(interval=None))) # Update CPU
+        self.ram_load_info_label.setText(str(psutil.virtual_memory().percent)) # Update RAM
+        self.gpu_load_info_label.setText((str(GPUtil.getGPUs()[0].load))) # Update GPU
 
     @Slot(QTreeWidgetItem, int)
     def left_menu_clicked(self, item, col):
@@ -176,29 +185,39 @@ class Ui_MainWindow(object):
         if adding_new_cam.choice_value == 'rtsp':
             self.rtsp = QTreeWidgetItem(self.settings)
             if self.rtsp_index == 1:
-                self.rtsp.setText(0, 'RTSP')
+                self.rtsp_name = 'RTSP'
+                self.rtsp.setText(0, self.rtsp_name)
                 self.rtsp_index += 1
             else:
-                self.rtsp.setText(0, f'RTSP {self.rtsp_index}')
+                self.rtsp_name = f'RTSP {self.rtsp_index}'
+                self.rtsp.setText(0, self.rtsp_name)
                 self.rtsp_index += 1
 
             self.actual_index += 1
             self.rtsp.setData(0, Qt.UserRole, self.actual_index)
-            self.rtsp_page = Rtsp_page(self.actual_index)
+            self.rtsp_page = Rtsp_page(self.actual_index, self.rtsp_name, self.rtsp)
+            self.rtsp_page.sending.connect(self.update_print)
+            #self.rtsp_page = Rtsp_page(self.actual_index, self.rtsp_name, self.rtsp)
             self.main_window_stackedWidget.addWidget(self.rtsp_page.setupGUi())
 
         elif adding_new_cam.choice_value == 'webcam':
             self.webcam = QTreeWidgetItem(self.settings)
-            self.webcam.setText(0, 'Webcam')
+            self.webcam_name = 'Webcam'
+            self.webcam.setText(0, self.webcam_name)
+
             self.actual_index += 1
             self.webcam.setData(0, Qt.UserRole, self.actual_index)
-            self.webcam = Webcam_page(self.actual_index)
+            self.webcam = Webcam_page(self.actual_index, self.webcam_name, self.webcam)
             self.main_window_stackedWidget.addWidget(self.webcam.setupGUi())
 
-class Rtsp_page:
+class Rtsp_page(QObject):
+    sending = Signal(QWidget, int, int)
+    def __init__(self, actual_index, rtsp_name, rtsp_left_menu_name):
+        super().__init__()
 
-    def __init__(self, actual_index):
         self.actual_index = actual_index
+        self.rtsp_name = rtsp_name
+        self.rtsp_left_menu_name = rtsp_left_menu_name
 
     def setupGUi(self):
         self.rtsp_page = QWidget()
@@ -228,6 +247,7 @@ class Rtsp_page:
         self.rtsp_actual_status_label.setObjectName(u"rtsp_actual_status_label")
         self.rtsp_actual_status_label.setGeometry(QRect(50, 100, 47, 13))
 
+
         self.rtsp_device_name_label.setText(QCoreApplication.translate("MainWindow", u"Device name:", None))
         self.rtsp_stream_url_label.setText(QCoreApplication.translate("MainWindow", u"Stream URL:", None))
         self.rtsp_enable_pushButton.setText(QCoreApplication.translate("MainWindow", u"Enable", None))
@@ -235,11 +255,30 @@ class Rtsp_page:
         self.rtsp_status_label.setText(QCoreApplication.translate("MainWindow", u"Status:", None))
         self.rtsp_actual_status_label.setText(QCoreApplication.translate("MainWindow", u"Disabled", None))
 
+        self.rtsp_device_name_lineEdit.setText(self.rtsp_name)
+        self.rtsp_device_name_lineEdit.textChanged.connect(lambda: self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text()))
+
+        self.rtsp_enable_pushButton.clicked.connect(self.enable_rtsp_cam)
+
         return self.rtsp_page
 
+    def enable_rtsp_cam(self):
+        new_camera = Newcamera(self.rtsp_stream_url_lineEdit.text())
+        self.sending.emit(new_camera.add_new_camera(),0, 0)
+        #print(self.rtsp_stream_url_lineEdit.text())
+        #self.sending.emit(1)
+
+    #def enable_rtsp_cam(self, rtsp_url_link):
+        #new_camera = Newcamera(rtsp_url_link)
+        #self.entered.emit(self.cameras_page_gridLayout.addWidget(new_camera.add_new_camera(),0, 0))
+
+
+
 class Webcam_page:
-    def __init__(self, actual_index):
+    def __init__(self, actual_index, webcam_name, webcam_left_menu_name):
         self.actual_index = actual_index
+        self.webcam_name = webcam_name
+        self.webcam_left_menu_name = webcam_left_menu_name
     def setupGUi(self):
         self.webcam_page = QWidget()
         self.webcam_page.setObjectName(u"webcam_page")
@@ -268,7 +307,7 @@ class Webcam_page:
         self.webcam_status_label.setText(QCoreApplication.translate("MainWindow", u"Status:", None))
         self.webcam_actual_status_label.setText(QCoreApplication.translate("MainWindow", u"Disabled", None))
 
+        self.webcam_device_name_lineEdit.setText(self.webcam_name)
+        self.webcam_device_name_lineEdit.textChanged.connect(lambda: self.webcam_left_menu_name.setText(0, self.webcam_device_name_lineEdit.text()))
+
         return self.webcam_page
-
-
-

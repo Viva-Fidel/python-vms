@@ -5,12 +5,11 @@ from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel, QHBoxLayout, QVB
 from camera import Camera
 
 class Newcamera:
-    def __init__(self, camera_url, camera_name):
+    def __init__(self, camera_url):
         super().__init__()
         self.camera_url = camera_url
-        self.camera_name = camera_name
 
-    def add_new_new_camera(self):
+    def add_new_camera(self):
         self.camera = QLabel()
         self.camera.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.camera.setScaledContents(True)

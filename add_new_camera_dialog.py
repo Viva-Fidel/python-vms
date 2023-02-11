@@ -63,17 +63,3 @@ class Ui_Add_new_cam_dialog(object):
             self.choice_value = 'onvif'
         elif self.webcam_checkBox.isChecked():
             self.choice_value = 'webcam'
-
-    #def add_new_camera(self):
-        #if self.rtsp_checkBox.isChecked():
-            #engine = create_engine('sqlite:///rtsp_cam_list.db', echo=True)
-            #Session = sessionmaker(bind=engine)
-            #session = Session()
-            #camera = Rtsp_cam_list(self.rtsp_device_name_lineEdit.text(), self.rtsp_link_lineEdit.text())
-            #session.add(camera)
-            #session.commit()
-            #new_camera = Newcamera(self.rtsp_link_lineEdit.text(), self.rtsp_device_name_lineEdit.text())
-            #self.cameras_page_gridLayout.addWidget(new_camera.add_new_new_camera(), 0, 0)
-
-        #if self.webcam_checkBox.isChecked():
-

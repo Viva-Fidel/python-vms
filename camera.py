@@ -5,12 +5,12 @@ import time
 import numpy as np
 
 from PySide6.QtCore import QThread, Signal, QObject, Slot
-from PySide6.QtGui import QImage
+from PySide6.QtGui import QImage, Qt
 
 
 class Camera(QThread):
 
-    ImageUpdated = Signal(np.ndarray)
+    ImageUpdated = Signal(QImage)
 
     def __init__(self, camera_url):
         super().__init__()
@@ -37,9 +37,20 @@ class Camera(QThread):
         #if cap.isOpened()== True:
         while (cap.isOpened()):
             ret, frame = cap.read()
-            #cv2.imshow('test', frame)
 
-            self.ImageUpdated.emit(frame)
+            height, width, channels = frame.shape
+
+            bytes_per_line = width * channels
+
+            if ret:
+                cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+
+                qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
+
+                self.ImageUpdated.emit(qt_rgb_image_scaled)
+
 
 
                 #self.true_fps = cap.get(cv2.CAP_PROP_FPS)
