@@ -295,8 +295,10 @@ class Rtsp_page(QObject):
                     self.rtsp_enable_pushButton.setText("Disable")
                     self.rtsp_actual_status_label.setText("Enabled")
                     self.status = True
-                    print(Ui_MainWindow.camera_position_in_grid)
                     break
+    #def disable_rtsp_cam(self):
+
+
 
 
 class Webcam_page(QObject):
@@ -357,5 +359,4 @@ class Webcam_page(QObject):
                     self.webcam_enable_pushButton.setText("Disable")
                     self.webcam_actual_status_label.setText("Enabled")
                     self.status = True
-                    print(Ui_MainWindow.camera_position_in_grid)
                     break

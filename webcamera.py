@@ -12,22 +12,13 @@ class Webcamera(QThread):
 
     ImageUpdated = Signal(QImage)
 
-    def __init__(self):
-        super().__init__()
+    def  __init__(self, parent=None):
+        QThread.__init__(self, parent)
         self.prev_frame_time = 0
         self.fps = 0
         self.true_fps = 0
 
-
-        self.thread = Thread(target=self.run_camera, args=())
-        self.thread.daemon = True
-
-    def start(self):
-        self.thread.start()
-        return self
-
-
-    def run_camera(self):
+    def run(self):
         cap = cv2.VideoCapture(0)
 
         if cap.isOpened()== True:

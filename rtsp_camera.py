@@ -14,21 +14,16 @@ class Rtsp_camera(QThread):
 
     def __init__(self, camera_url):
         super().__init__()
+
         self.camera_url = camera_url
         self.prev_frame_time = 0
         self.fps = 0
         self.true_fps = 0
 
 
-        self.thread = Thread(target=self.run_camera, args=())
-        self.thread.daemon = True
-
-    def start(self):
-        self.thread.start()
-        return self
 
 
-    def run_camera(self):
+    def run(self):
         cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
 
