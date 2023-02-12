@@ -27,7 +27,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from add_new_camera_dialog import Ui_Add_new_cam_dialog
-from add_new_camera_event import Newcamera
+from add_new_rtsp_camera_event import New_rtsp_camera
+from add_new_webcam_event import New_webcamera
 
 import resources
 
@@ -148,8 +149,9 @@ class Ui_MainWindow(object):
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
     @Slot(QObject, QWidget, int, int)
-    def update_print(self, value1, value2, value3):
-        self.cameras_page_gridLayout.addWidget(value1, value2, value3)
+    def update_cameras_page_gridLayout(self, camera_func, x_pos, y_pos):
+        self.cameras_page_gridLayout.addWidget(camera_func, x_pos, y_pos)
+
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
@@ -196,8 +198,7 @@ class Ui_MainWindow(object):
             self.actual_index += 1
             self.rtsp.setData(0, Qt.UserRole, self.actual_index)
             self.rtsp_page = Rtsp_page(self.actual_index, self.rtsp_name, self.rtsp)
-            self.rtsp_page.sending.connect(self.update_print)
-            #self.rtsp_page = Rtsp_page(self.actual_index, self.rtsp_name, self.rtsp)
+            self.rtsp_page.rtsp_update_main_gui.connect(self.update_cameras_page_gridLayout)
             self.main_window_stackedWidget.addWidget(self.rtsp_page.setupGUi())
 
         elif adding_new_cam.choice_value == 'webcam':
@@ -207,11 +208,12 @@ class Ui_MainWindow(object):
 
             self.actual_index += 1
             self.webcam.setData(0, Qt.UserRole, self.actual_index)
-            self.webcam = Webcam_page(self.actual_index, self.webcam_name, self.webcam)
-            self.main_window_stackedWidget.addWidget(self.webcam.setupGUi())
+            self.webcam_page = Webcam_page(self.actual_index, self.webcam_name, self.webcam)
+            self.webcam_page.webcam_update_main_gui.connect(self.update_cameras_page_gridLayout)
+            self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
 
 class Rtsp_page(QObject):
-    sending = Signal(QWidget, int, int)
+    rtsp_update_main_gui = Signal(QWidget, int, int)
     def __init__(self, actual_index, rtsp_name, rtsp_left_menu_name):
         super().__init__()
 
@@ -263,19 +265,23 @@ class Rtsp_page(QObject):
         return self.rtsp_page
 
     def enable_rtsp_cam(self):
-        new_camera = Newcamera(self.rtsp_stream_url_lineEdit.text())
-        self.sending.emit(new_camera.add_new_camera(),0, 0)
-        #print(self.rtsp_stream_url_lineEdit.text())
-        #self.sending.emit(1)
+        new_camera = New_rtsp_camera(self.rtsp_stream_url_lineEdit.text())
+        status = new_camera.add_new_camera()
+        if status == False:
+            self.rtsp_actual_status_label.setText("Error")
+        else:
+            self.rtsp_update_main_gui.emit(status, 0, 0)
+            self.rtsp_enable_pushButton.setText("Disable")
+            self.rtsp_actual_status_label.setText("Enabled")
 
-    #def enable_rtsp_cam(self, rtsp_url_link):
-        #new_camera = Newcamera(rtsp_url_link)
-        #self.entered.emit(self.cameras_page_gridLayout.addWidget(new_camera.add_new_camera(),0, 0))
+
+class Webcam_page(QObject):
+    webcam_update_main_gui = Signal(QWidget, int, int)
 
 
-
-class Webcam_page:
     def __init__(self, actual_index, webcam_name, webcam_left_menu_name):
+        super().__init__()
+
         self.actual_index = actual_index
         self.webcam_name = webcam_name
         self.webcam_left_menu_name = webcam_left_menu_name
@@ -310,4 +316,16 @@ class Webcam_page:
         self.webcam_device_name_lineEdit.setText(self.webcam_name)
         self.webcam_device_name_lineEdit.textChanged.connect(lambda: self.webcam_left_menu_name.setText(0, self.webcam_device_name_lineEdit.text()))
 
+        self.webcam_enable_pushButton.clicked.connect(self.enable_webcam)
+
         return self.webcam_page
+
+    def enable_webcam(self):
+        new_camera = New_webcamera()
+        status = new_camera.add_new_camera()
+        if status == False:
+            self.webcam_actual_status_label.setText("Error")
+        else:
+            self.webcam_update_main_gui.emit(status, 0, 0)
+            self.webcam_enable_pushButton.setText("Disable")
+            self.webcam_actual_status_label.setText("Enabled")

@@ -8,7 +8,7 @@ from PySide6.QtCore import QThread, Signal, QObject, Slot
 from PySide6.QtGui import QImage, Qt
 
 
-class Camera(QThread):
+class Rtsp_camera(QThread):
 
     ImageUpdated = Signal(QImage)
 
@@ -25,31 +25,23 @@ class Camera(QThread):
 
     def start(self):
         self.thread.start()
-        print(self.thread.is_alive())
         return self
 
 
     def run_camera(self):
-        #cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
-        cap = cv2.VideoCapture(0)
-        #cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
+        cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
 
-        #if cap.isOpened()== True:
-        while (cap.isOpened()):
-            ret, frame = cap.read()
-
-            height, width, channels = frame.shape
-
-            bytes_per_line = width * channels
-
-            if ret:
-                cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-
-                qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
-
-                self.ImageUpdated.emit(qt_rgb_image_scaled)
+        if cap.isOpened()== True:
+            while (cap.isOpened()):
+                ret, frame = cap.read()
+                height, width, channels = frame.shape
+                bytes_per_line = width * channels
+                if ret:
+                    cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                    qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
+                    self.ImageUpdated.emit(qt_rgb_image_scaled)
 
 
 
@@ -76,7 +68,8 @@ class Camera(QThread):
 
 
                 #self.ImageUpdated.emit(qt_rgb_image)
-        cap.release()
+            cap.release()
+
 
 
 
