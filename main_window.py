@@ -34,6 +34,22 @@ import resources
 
 
 class Ui_MainWindow(object):
+
+    #camera_position_in_grid = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]]
+
+    camera_position_in_grid = {
+        (0, 0): None,
+        (0, 1): None,
+        (0, 2): None,
+        (1, 0): None,
+        (1, 1): None,
+        (1, 2): None,
+        (2, 0): None,
+        (2, 1): None,
+        (2, 2): None
+    }
+
+
     def __init__(self):
         super().__init__()
         self.actual_index = 0
@@ -141,8 +157,6 @@ class Ui_MainWindow(object):
 
         self.add_new_camera_pushButton.clicked.connect(self.add_new_cam_dialog)
 
-        #self.cameras_page_gridLayout.clicked.connect(self.update)
-
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
@@ -220,6 +234,7 @@ class Rtsp_page(QObject):
         self.actual_index = actual_index
         self.rtsp_name = rtsp_name
         self.rtsp_left_menu_name = rtsp_left_menu_name
+        self.status = False
 
     def setupGUi(self):
         self.rtsp_page = QWidget()
@@ -260,19 +275,28 @@ class Rtsp_page(QObject):
         self.rtsp_device_name_lineEdit.setText(self.rtsp_name)
         self.rtsp_device_name_lineEdit.textChanged.connect(lambda: self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text()))
 
-        self.rtsp_enable_pushButton.clicked.connect(self.enable_rtsp_cam)
+        if self.status == False:
+            self.rtsp_enable_pushButton.clicked.connect(self.enable_rtsp_cam)
+        elif self.status == True:
+            self.rtsp_enable_pushButton.clicked.connect(self.disable_rtsp_cam)
 
         return self.rtsp_page
 
     def enable_rtsp_cam(self):
         new_camera = New_rtsp_camera(self.rtsp_stream_url_lineEdit.text())
-        status = new_camera.add_new_camera()
-        if status == False:
+        cam_status = new_camera.add_new_camera()
+        if cam_status == False:
             self.rtsp_actual_status_label.setText("Error")
         else:
-            self.rtsp_update_main_gui.emit(status, 0, 0)
-            self.rtsp_enable_pushButton.setText("Disable")
-            self.rtsp_actual_status_label.setText("Enabled")
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v == None:
+                    Ui_MainWindow.camera_position_in_grid[k] = new_camera
+                    self.rtsp_update_main_gui.emit(cam_status, k[0], k[1])
+                    self.rtsp_enable_pushButton.setText("Disable")
+                    self.rtsp_actual_status_label.setText("Enabled")
+                    self.status = True
+                    print(Ui_MainWindow.camera_position_in_grid)
+                    break
 
 
 class Webcam_page(QObject):
@@ -281,10 +305,10 @@ class Webcam_page(QObject):
 
     def __init__(self, actual_index, webcam_name, webcam_left_menu_name):
         super().__init__()
-
         self.actual_index = actual_index
         self.webcam_name = webcam_name
         self.webcam_left_menu_name = webcam_left_menu_name
+        self.status = False
     def setupGUi(self):
         self.webcam_page = QWidget()
         self.webcam_page.setObjectName(u"webcam_page")
@@ -322,10 +346,16 @@ class Webcam_page(QObject):
 
     def enable_webcam(self):
         new_camera = New_webcamera()
-        status = new_camera.add_new_camera()
-        if status == False:
+        cam_status = new_camera.add_new_camera()
+        if cam_status == False:
             self.webcam_actual_status_label.setText("Error")
         else:
-            self.webcam_update_main_gui.emit(status, 0, 0)
-            self.webcam_enable_pushButton.setText("Disable")
-            self.webcam_actual_status_label.setText("Enabled")
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v == None:
+                    Ui_MainWindow.camera_position_in_grid[k] = new_camera
+                    self.webcam_update_main_gui.emit(cam_status, k[0], k[1])
+                    self.webcam_enable_pushButton.setText("Disable")
+                    self.webcam_actual_status_label.setText("Enabled")
+                    self.status = True
+                    print(Ui_MainWindow.camera_position_in_grid)
+                    break
