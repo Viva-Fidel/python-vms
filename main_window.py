@@ -32,11 +32,9 @@ from add_new_webcam_event import New_webcamera
 
 import resources
 
-
 class Ui_MainWindow(object):
 
-    #camera_position_in_grid = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]]
-
+    # All possible positions in grid
     camera_position_in_grid = {
         (0, 0): None,
         (0, 1): None,
@@ -48,6 +46,22 @@ class Ui_MainWindow(object):
         (2, 1): None,
         (2, 2): None
     }
+
+    # All possible tree widget
+    tree_widget_list = {
+        3: None,
+        4: None,
+        5: None,
+        6: None,
+        7: None,
+        8: None,
+        9: None,
+        10: None,
+        11: None
+    }
+
+    # Current position of user in menu
+    user_current_position = 0
 
 
     def __init__(self):
@@ -144,32 +158,29 @@ class Ui_MainWindow(object):
         self.settings.setIcon(0, settings_icon)
         self.settings.setData(0, Qt.UserRole, self.actual_index)
 
+        "____________________________________________________"
+        # Switch user position
+
         self.left_menu_treeWidget.itemClicked.connect(self.left_menu_clicked)
 
         "____________________________________________________"
-        # Dasboard timer
+        # Dashboard timer
 
         dashboard_timer = QTimer(self, interval=1000, timeout=self.update_dashboard)
         dashboard_timer.start()
 
         "____________________________________________________"
-        # Dialo to add new cameras
+        # Dialog to add new cameras
 
         self.add_new_camera_pushButton.clicked.connect(self.add_new_cam_dialog)
+
+        "____________________________________________________"
 
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
-    @Slot(QObject, QWidget, int, int)
-    def add_cameras_page_gridLayout(self, camera_func, x_pos, y_pos):
-        self.cameras_page_gridLayout.addWidget(camera_func, x_pos, y_pos)
-
-    @Slot(QWidget, int, int)
-    def delete_cameras_page_gridLayout(self, camera_func, x_pos, y_pos):
-        camera_func.deleteLater()
-
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Camera obscura VMS", None))
@@ -184,18 +195,50 @@ class Ui_MainWindow(object):
         self.add_new_camera_pushButton.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
     # retranslateUi
 
+    "____________________________________________________"
+    # Function to update dashboard page
     def update_dashboard(self):
         self.cpu_load_info_label.setText(str(psutil.cpu_percent(interval=None))) # Update CPU
         self.ram_load_info_label.setText(str(psutil.virtual_memory().percent)) # Update RAM
         self.gpu_load_info_label.setText((str(GPUtil.getGPUs()[0].load))) # Update GPU
 
+    "____________________________________________________"
+
+    #Slot to get information what position in menu was chosen
     @Slot(QTreeWidgetItem, int)
     def left_menu_clicked(self, item, col):
         print(item, col, item.text(col))
         if item.data(col, Qt.UserRole) is not None:
+            Ui_MainWindow.user_current_position = item.data(col, Qt.UserRole) # Store current position
             print(item.data(col, Qt.UserRole))
             self.main_window_stackedWidget.setCurrentIndex(item.data(col, Qt.UserRole))
 
+    "____________________________________________________"
+
+    # Slot to add new camera to gridLayout
+    @Slot(QObject, QWidget, int, int)
+    def add_cameras_page_gridLayout(self, camera_func, x_pos, y_pos):
+        self.cameras_page_gridLayout.addWidget(camera_func, x_pos, y_pos)
+
+    "____________________________________________________"
+
+    # Slot to delete camera in gridLayout
+    @Slot(QWidget)
+    def delete_cameras_page_gridLayout(self, camera_func):
+            camera_func.deleteLater()
+
+    "____________________________________________________"
+
+    # Slot to totally delete page from menu
+    @Slot(int)
+    def delete_qtree_item(self, qtree_child_index):
+        self.settings.removeChild(Ui_MainWindow.tree_widget_list[qtree_child_index])
+        self.main_window_stackedWidget.setCurrentIndex(qtree_child_index-1)
+        Ui_MainWindow.tree_widget_list[qtree_child_index] = None
+
+    "____________________________________________________"
+
+    # Function to call a dialog and add new camera
     def add_new_cam_dialog(self):
         Dialog = QDialog()
         adding_new_cam = Ui_Add_new_cam_dialog()
@@ -204,7 +247,7 @@ class Ui_MainWindow(object):
         Dialog.exec()
         if adding_new_cam.choice_value == 'rtsp':
             self.rtsp = QTreeWidgetItem(self.settings)
-            if self.rtsp_index == 1:
+            if self.rtsp_index == 1: # Need to set up logic for it!!!!!!!!!!!!!!!!!!!!!!!
                 self.rtsp_name = 'RTSP'
                 self.rtsp.setText(0, self.rtsp_name)
                 self.rtsp_index += 1
@@ -213,11 +256,17 @@ class Ui_MainWindow(object):
                 self.rtsp.setText(0, self.rtsp_name)
                 self.rtsp_index += 1
 
-            self.actual_index += 1
+            for k, v in Ui_MainWindow.tree_widget_list.items():
+                if v == None:
+                    self.actual_index = k
+                    Ui_MainWindow.tree_widget_list[k] = self.rtsp
+                    break
+
             self.rtsp.setData(0, Qt.UserRole, self.actual_index)
             self.rtsp_page = Rtsp_page(self.actual_index, self.rtsp_name, self.rtsp)
             self.rtsp_page.rtsp_update_main_gui_add.connect(self.add_cameras_page_gridLayout)
             self.rtsp_page.rtsp_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)
+            self.rtsp_page.rtsp_delete_page.connect(self.delete_qtree_item)
             self.main_window_stackedWidget.addWidget(self.rtsp_page.setupGUi())
 
         elif adding_new_cam.choice_value == 'webcam':
@@ -225,15 +274,27 @@ class Ui_MainWindow(object):
             self.webcam_name = 'Webcam'
             self.webcam.setText(0, self.webcam_name)
 
-            self.actual_index += 1
+            for k, v in Ui_MainWindow.tree_widget_list.items():
+                if v == None:
+                    self.actual_index = k
+                    Ui_MainWindow.tree_widget_list[k] = self.webcam
+                    break
+
             self.webcam.setData(0, Qt.UserRole, self.actual_index)
             self.webcam_page = Webcam_page(self.actual_index, self.webcam_name, self.webcam)
             self.webcam_page.webcam_update_main_gui.connect(self.add_cameras_page_gridLayout)
+            self.webcam_page.webcam_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)
+            self.webcam_page.webcam_delete_page.connect(self.delete_qtree_item)
             self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
 
+"____________________________________________________"
+
+# Class to add a camera using RTSP
 class Rtsp_page(QObject):
     rtsp_update_main_gui_add = Signal(QWidget, int, int)
-    rtsp_update_main_gui_delete = Signal(QWidget, int, int)
+    rtsp_update_main_gui_delete = Signal(QWidget)
+    rtsp_delete_page = Signal(int)
+
     def __init__(self, actual_index, rtsp_name, rtsp_left_menu_name):
         super().__init__()
 
@@ -282,8 +343,8 @@ class Rtsp_page(QObject):
         self.rtsp_device_name_lineEdit.textChanged.connect(lambda: self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text()))
 
         self.rtsp_enable_pushButton.clicked.connect(self.enable_disable_rtsp_cam)
+        self.rtsp_delete_pushButton.clicked.connect(self.delete_rtsp_cam)
 
-        #self.rtsp_enable_pushButton.clicked.connect(self.disable_rtsp_cam)
 
         return self.rtsp_page
 
@@ -306,18 +367,32 @@ class Rtsp_page(QObject):
         elif self.status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                print(k, v)
                 if v == self.new_camera:
-                    self.rtsp_update_main_gui_delete.emit(self.cam_status, k[0], k[1])
+                    self.rtsp_update_main_gui_delete.emit(self.cam_status)
                     self.rtsp_enable_pushButton.setText("Enable")
                     self.rtsp_actual_status_label.setText("Disabled")
                     self.status = False
+                    Ui_MainWindow.camera_position_in_grid[k] = None
                     break
-
+    def delete_rtsp_cam(self):
+        if self.status == True:
+            try:
+                self.new_camera.stop_camera()
+                for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                    if v == self.new_camera:
+                        self.rtsp_update_main_gui_delete.emit(self.cam_status)
+                        Ui_MainWindow.camera_position_in_grid[k] = None
+            except:
+                pass
+            self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
+        elif self.status == False:
+            self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
 
 
 class Webcam_page(QObject):
     webcam_update_main_gui = Signal(QWidget, int, int)
+    webcam_update_main_gui_delete = Signal(QWidget)
+    webcam_delete_page = Signal(int)
 
 
     def __init__(self, actual_index, webcam_name, webcam_left_menu_name):
@@ -357,21 +432,51 @@ class Webcam_page(QObject):
         self.webcam_device_name_lineEdit.setText(self.webcam_name)
         self.webcam_device_name_lineEdit.textChanged.connect(lambda: self.webcam_left_menu_name.setText(0, self.webcam_device_name_lineEdit.text()))
 
-        self.webcam_enable_pushButton.clicked.connect(self.enable_webcam)
+        self.webcam_enable_pushButton.clicked.connect(self.enable_disable_webcam)
+
+        self.webcam_delete_pushButton.clicked.connect(self.delete_webcam)
 
         return self.webcam_page
 
-    def enable_webcam(self):
-        new_camera = New_webcamera()
-        cam_status = new_camera.add_new_camera()
-        if cam_status == False:
-            self.webcam_actual_status_label.setText("Error")
-        else:
+    def enable_disable_webcam(self):
+        # Enable
+        if self.status == False:
+            self.new_camera = New_webcamera()
+            self.cam_status = self.new_camera.add_new_camera()
+            if self.cam_status == False:
+                self.webcam_actual_status_label.setText("Error")
+            else:
+                for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                    if v == None:
+                        Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
+                        self.webcam_update_main_gui.emit(self.cam_status, k[0], k[1])
+                        self.webcam_enable_pushButton.setText("Disable")
+                        self.webcam_actual_status_label.setText("Enabled")
+                        self.status = True
+                        break
+
+        # Disable
+        elif self.status == True:
+            self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                if v == None:
-                    Ui_MainWindow.camera_position_in_grid[k] = new_camera
-                    self.webcam_update_main_gui.emit(cam_status, k[0], k[1])
-                    self.webcam_enable_pushButton.setText("Disable")
-                    self.webcam_actual_status_label.setText("Enabled")
-                    self.status = True
+                if v == self.new_camera:
+                    self.webcam_update_main_gui_delete.emit(self.cam_status)
+                    self.webcam_enable_pushButton.setText("Enable")
+                    self.webcam_actual_status_label.setText("Disabled")
+                    self.status = False
+                    Ui_MainWindow.camera_position_in_grid[k] = None
                     break
+
+    def delete_webcam(self):
+        if self.status == True:
+            try:
+                self.new_camera.stop_camera()
+                for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                    if v == self.new_camera:
+                        self.webcam_update_main_gui_delete.emit(self.cam_status)
+                        Ui_MainWindow.camera_position_in_grid[k] = None
+            except:
+                pass
+            self.webcam_delete_page.emit(Ui_MainWindow.user_current_position)
+        elif self.status == False:
+            self.webcam_delete_page.emit(Ui_MainWindow.user_current_position)

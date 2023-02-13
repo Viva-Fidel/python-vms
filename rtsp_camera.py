@@ -19,28 +19,29 @@ class Rtsp_camera(QThread):
         self.prev_frame_time = 0
         self.fps = 0
         self.true_fps = 0
-
-
+        self.running = True
 
 
     def run(self):
         cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
 
-        if cap.isOpened()== True:
-            while (cap.isOpened()):
-                ret, frame = cap.read()
-                height, width, channels = frame.shape
-                bytes_per_line = width * channels
-                if ret:
-                    cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-                    qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
-                    self.ImageUpdated.emit(qt_rgb_image_scaled)
+        if self.running == True:
+            if cap.isOpened() == True:
+                while (cap.isOpened()):
+                    ret, frame = cap.read()
+                    height, width, channels = frame.shape
+                    bytes_per_line = width * channels
+                    if ret:
+                        cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                        qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
+                        self.ImageUpdated.emit(qt_rgb_image_scaled)
 
+        else:
+            cap.release()
 
-
-                #self.true_fps = cap.get(cv2.CAP_PROP_FPS)
+            #self.true_fps = cap.get(cv2.CAP_PROP_FPS)
                 #self.height, self.width, self.channels = frame.shape
                 #bytes_per_line = self.height * self.channels
 
@@ -65,7 +66,8 @@ class Rtsp_camera(QThread):
                 #self.ImageUpdated.emit(qt_rgb_image)
             cap.release()
 
-
+    def stop_running(self):
+        self.running = False
 
 
 

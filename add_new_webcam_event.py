@@ -33,3 +33,10 @@ class New_webcamera(QObject):
     @Slot(QImage)
     def ShowCamera(self, frame):
         self.camera.setPixmap(QPixmap.fromImage(frame))
+
+    def stop_camera(self):
+        self.capture_camera.stop_running()
+        self.capture_camera.terminate()
+
+    def __del__(self):
+        print("Object is deleted")
