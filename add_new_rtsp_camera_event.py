@@ -34,3 +34,6 @@ class New_rtsp_camera(QObject):
     @Slot(QImage)
     def ShowCamera(self, frame):
         self.camera.setPixmap(QPixmap.fromImage(frame))
+
+    def stop_camera(self):
+        self.capture_camera.terminate()
