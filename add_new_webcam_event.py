@@ -11,24 +11,20 @@ class New_webcamera(QObject):
         super().__init__()
 
     def add_new_camera(self):
-        cap = cv2.VideoCapture(0)
-        if cap.isOpened() == True:
-            self.camera = QLabel()
-            self.camera.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-            self.camera.setScaledContents(True)
+        self.camera = QLabel()
+        self.camera.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.camera.setScaledContents(True)
 
-            self.QScrollArea = QScrollArea()
-            self.QScrollArea.setBackgroundRole(QPalette.Dark)
-            self.QScrollArea.setWidgetResizable(True)
-            self.QScrollArea.setWidget(self.camera)
+        self.QScrollArea = QScrollArea()
+        self.QScrollArea.setBackgroundRole(QPalette.Dark)
+        self.QScrollArea.setWidgetResizable(True)
+        self.QScrollArea.setWidget(self.camera)
 
-            self.capture_camera = Webcamera(self)
-            self.capture_camera.ImageUpdated.connect(self.ShowCamera)
-            self.capture_camera.start()
-            print(self.capture_camera.isRunning())
-            return self.QScrollArea
-        else:
-            return False
+        self.capture_camera = Webcamera(self)
+        self.capture_camera.ImageUpdated.connect(self.ShowCamera)
+        self.capture_camera.start()
+
+        return self.QScrollArea
 
     @Slot(QImage)
     def ShowCamera(self, frame):

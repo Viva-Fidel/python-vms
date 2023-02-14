@@ -17,7 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QLCDNumber, QLayout, QListView,
                                QMainWindow, QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QScrollArea, QDialogButtonBox,
-                               QCheckBox, QLineEdit, QSpinBox, QTreeView, QFrame, QTreeWidget, QTreeWidgetItem)
+                               QCheckBox, QLineEdit, QSpinBox, QTreeView, QFrame, QTreeWidget, QTreeWidgetItem,
+                               QHBoxLayout, QSplitter, QStyleFactory)
 from PySide6 import QtCore
 
 import GPUtil
@@ -74,15 +75,22 @@ class Ui_MainWindow(object):
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(800, 600)
 
+
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
+        self.centralwidget.setMinimumSize(800, 600)
+
+
         self.left_menu_treeWidget = QTreeWidget(self.centralwidget)
         self.left_menu_treeWidget.setObjectName(u"left_menu_treeView")
         self.left_menu_treeWidget.setGeometry(QRect(10, 1, 111, 591))
         self.left_menu_treeWidget.setHeaderHidden(True)
+
         self.main_window_stackedWidget = QStackedWidget(self.centralwidget)
         self.main_window_stackedWidget.setObjectName(u"main_window_stackedWidget")
         self.main_window_stackedWidget.setGeometry(QRect(130, 0, 661, 591))
+
+
         self.dashboard_page = QWidget()
         self.dashboard_page.setObjectName(u"dashboard_page")
         self.software_version_label = QLabel(self.dashboard_page)
@@ -127,10 +135,15 @@ class Ui_MainWindow(object):
         self.main_window_stackedWidget.addWidget(self.cameras_page)
         self.settings_page = QWidget()
         self.settings_page.setObjectName(u"settings_page")
+
+
         self.add_new_camera_pushButton = QPushButton(self.settings_page)
         self.add_new_camera_pushButton.setObjectName(u"add_camera_pushButton")
         self.add_new_camera_pushButton.setGeometry(QRect(0, 560, 75, 23))
+
         self.main_window_stackedWidget.addWidget(self.settings_page)
+
+        self.main_window_stackedWidget.setCurrentIndex(0)
 
         "____________________________________________________"
         # Tree model menu
@@ -141,6 +154,7 @@ class Ui_MainWindow(object):
         dashboard_icon.addFile(u":/media/icons/dashboard.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.dashboard.setIcon(0, dashboard_icon)
         self.dashboard.setData(0, Qt.UserRole, self.actual_index)
+        self.dashboard.setTextAlignment(0, Qt.AlignLeft)
 
         self.actual_index += 1
         self.cameras = QTreeWidgetItem(self.left_menu_treeWidget)
@@ -149,6 +163,7 @@ class Ui_MainWindow(object):
         cameras_icon.addFile(u":/media/icons/cameras.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.cameras.setIcon(0, cameras_icon)
         self.cameras.setData(0, Qt.UserRole, self.actual_index)
+        self.cameras.setTextAlignment(0, Qt.AlignLeft)
 
         self.actual_index += 1
         self.settings = QTreeWidgetItem(self.left_menu_treeWidget)
@@ -157,6 +172,7 @@ class Ui_MainWindow(object):
         settings_icon.addFile(u":/media/icons/settings.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.settings.setIcon(0, settings_icon)
         self.settings.setData(0, Qt.UserRole, self.actual_index)
+        self.settings.setTextAlignment(0, Qt.AlignLeft)
 
         "____________________________________________________"
         # Switch user position
