@@ -1,12 +1,7 @@
-from threading import Thread
-
-import cv2
-import time
-import numpy as np
-
-from PySide6.QtCore import QThread, Signal, QObject, Slot
+from PySide6.QtCore import QThread, Signal
 from PySide6.QtGui import QImage, Qt
 
+import cv2
 
 class Webcamera(QThread):
 
@@ -31,8 +26,8 @@ class Webcamera(QThread):
                     if ret:
                         cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                         qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-                        qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
-                        self.ImageUpdated.emit(qt_rgb_image_scaled)
+                        #qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
+                        self.ImageUpdated.emit(cv_rgb_image)
 
         else:
             cap.release()

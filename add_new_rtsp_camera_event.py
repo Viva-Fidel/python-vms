@@ -1,8 +1,6 @@
-from PySide6.QtCore import QThread, Slot, QObject
-from PySide6.QtGui import QPalette, QImage, QPixmap, Qt
-from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel, QHBoxLayout, QVBoxLayout
-
-import cv2
+from PySide6.QtCore import Slot, QObject
+from PySide6.QtGui import QPalette, QImage, QPixmap
+from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel
 
 from rtsp_camera import Rtsp_camera
 

@@ -20,7 +20,7 @@
       <property name="maximumSize">
        <size>
         <width>120</width>
-        <height>600</height>
+        <height>1000</height>
        </size>
       </property>
       <property name="baseSize">
@@ -38,340 +38,415 @@
     </item>
     <item>
      <widget class="QStackedWidget" name="main_window_stackedWidget">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="currentIndex">
        <number>4</number>
       </property>
       <widget class="QWidget" name="dashboard_page">
-       <widget class="QWidget" name="">
-        <property name="geometry">
-         <rect>
-          <x>11</x>
-          <y>2</y>
-          <width>121</width>
-          <height>115</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="dashboard_page_verticalLayout">
-         <item>
-          <layout class="QVBoxLayout" name="dashboard_page_version_verticalLayout">
-           <item>
-            <widget class="QLabel" name="software_version_label">
-             <property name="text">
-              <string>Software version: 0.01a</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="system_parameters_label">
-             <property name="text">
-              <string>System parameters:</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QFrame" name="system_parameters_frame">
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="dashboard_page_verticalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="dashboard_page_version_verticalLayout">
             <item>
-             <layout class="QVBoxLayout" name="dashboard_page_info_verticalLayout">
-              <item>
-               <widget class="QLabel" name="cpu_load_label">
-                <property name="text">
-                 <string>CPU load:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="ram_load_label">
-                <property name="text">
-                 <string>RAM load:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="gpu_load_label">
-                <property name="text">
-                 <string>GPU load:</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QLabel" name="software_version_label">
+              <property name="text">
+               <string>Software version: 0.01a</string>
+              </property>
+             </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="dashboard_page_values_verticalLayout">
-              <item>
-               <widget class="QLabel" name="cpu_load_info_label">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="ram_load_info_label">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="gpu_load_info_label">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QLabel" name="system_parameters_label">
+              <property name="text">
+               <string>System parameters:</string>
+              </property>
+             </widget>
             </item>
            </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="system_parameters_frame">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <layout class="QVBoxLayout" name="dashboard_page_info_verticalLayout">
+               <item>
+                <widget class="QLabel" name="cpu_load_label">
+                 <property name="text">
+                  <string>CPU load:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="ram_load_label">
+                 <property name="text">
+                  <string>RAM load:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="gpu_load_label">
+                 <property name="text">
+                  <string>GPU load:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="dashboard_page_info_verticalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="dashboard_page_values_verticalLayout">
+               <item>
+                <widget class="QLabel" name="cpu_load_info_label">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="ram_load_info_label">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="gpu_load_info_label">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="dashboard_page_values">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="system_parameters_horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="cameras_page">
-       <widget class="QWidget" name="gridLayoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>651</width>
-          <height>581</height>
-         </rect>
-        </property>
-        <layout class="QGridLayout" name="cameras_gridLayout">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-        </layout>
-       </widget>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="cameras_page_gridLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="settings_page">
-       <widget class="QWidget" name="verticalLayoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>559</y>
-          <width>81</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="settings_page_verticalLayout">
-         <item>
-          <widget class="QPushButton" name="add_camera_pushButton">
-           <property name="maximumSize">
-            <size>
-             <width>75</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Add camera</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QVBoxLayout" name="settings_page_verticalLayout">
+          <item>
+           <spacer name="settings_page_verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="add_camera_pushButton">
+            <property name="maximumSize">
+             <size>
+              <width>75</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Add camera</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="webcam_page">
-       <widget class="QWidget" name="">
-        <property name="geometry">
-         <rect>
-          <x>3</x>
-          <y>0</y>
-          <width>241</width>
-          <height>102</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="webcam_page_verticalLayout">
-         <item>
-          <layout class="QVBoxLayout" name="webcam_page_device_name_verticalLayout">
-           <item>
-            <widget class="QLabel" name="webcam_device_name_label">
-             <property name="text">
-              <string>Device name:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="webcam_device_name_lineEdit"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="webcam_page_status_horizontalLayout">
-           <item>
-            <widget class="QLabel" name="webcam_status_label">
-             <property name="text">
-              <string>Status:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="webcam_actual_status_label">
-             <property name="text">
-              <string>Disabled</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="webcam_page_status_horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="webcam_page_buttons_horizontalLayout">
-           <item>
-            <widget class="QPushButton" name="webcam_enable_pushButton">
-             <property name="text">
-              <string>Enable</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="webcam_delete_pushButton">
-             <property name="text">
-              <string>Delete</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="webcam_page_buttons_horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QVBoxLayout" name="webcam_page_verticalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="webcam_page_device_name_verticalLayout">
+            <item>
+             <widget class="QLabel" name="webcam_device_name_label">
+              <property name="text">
+               <string>Device name:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="webcam_device_name_lineEdit">
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="webcam_page_status_horizontalLayout">
+            <item>
+             <widget class="QLabel" name="webcam_status_label">
+              <property name="text">
+               <string>Status:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="webcam_actual_status_label">
+              <property name="text">
+               <string>Disabled</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="webcam_page_status_horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="webcam_page_buttons_horizontalLayout">
+            <item>
+             <widget class="QPushButton" name="webcam_enable_pushButton">
+              <property name="text">
+               <string>Enable</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="webcam_delete_pushButton">
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="webcam_page_buttons_horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="webcam_page_verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="rtsp_page">
-       <widget class="QWidget" name="">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>0</y>
-          <width>241</width>
-          <height>149</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="rtsp_page_verticalLayout">
-         <item>
-          <layout class="QVBoxLayout" name="rtsp_device_name_verticalLayout">
-           <item>
-            <widget class="QLabel" name="rtsp_device_name_label">
-             <property name="text">
-              <string>Device name:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="rtsp_device_name_lineEdit"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="rtsp_stream_url_verticalLayout">
-           <item>
-            <widget class="QLabel" name="rtsp_stream_url_label">
-             <property name="text">
-              <string>Stream URL:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="rtsp_stream_url_lineEdit"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="rtsp_actual_status_horizontalLayout">
-           <item>
-            <widget class="QLabel" name="rtsp_status_label">
-             <property name="text">
-              <string>Status:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="rtsp_actual_status_label">
-             <property name="text">
-              <string>Disabled</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="rtsp_actual_status_horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="rtsp_buttons_horizontalLayout">
-           <item>
-            <widget class="QPushButton" name="rtsp_enable_pushButton">
-             <property name="text">
-              <string>Enable</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="rtsp_delete_pushButton">
-             <property name="text">
-              <string>Delete</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="rtsp_buttons_horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QVBoxLayout" name="rtsp_page_verticalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="rtsp_device_name_verticalLayout">
+            <item>
+             <widget class="QLabel" name="rtsp_device_name_label">
+              <property name="text">
+               <string>Device name:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="rtsp_device_name_lineEdit">
+              <property name="maximumSize">
+               <size>
+                <width>250</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="rtsp_stream_url_verticalLayout">
+            <item>
+             <widget class="QLabel" name="rtsp_stream_url_label">
+              <property name="text">
+               <string>Stream URL:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="rtsp_stream_url_lineEdit">
+              <property name="maximumSize">
+               <size>
+                <width>250</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="rtsp_actual_status_horizontalLayout">
+            <item>
+             <widget class="QLabel" name="rtsp_status_label">
+              <property name="text">
+               <string>Status:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="rtsp_actual_status_label">
+              <property name="text">
+               <string>Disabled</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="rtsp_actual_status_horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="rtsp_buttons_horizontalLayout">
+            <item>
+             <widget class="QPushButton" name="rtsp_enable_pushButton">
+              <property name="text">
+               <string>Enable</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="rtsp_delete_pushButton">
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="rtsp_buttons_horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="rtsp_page_verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
