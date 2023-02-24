@@ -1,11 +1,17 @@
-from PySide6.QtCore import QThread, Signal
+import time
+
+import numpy as np
+from PySide6.QtCore import QThread, Signal, Slot
 from PySide6.QtGui import QImage, Qt
 
 import cv2
 
+from lpr_analytics import Lpr_analytics
+
+
 class Rtsp_camera(QThread):
 
-    ImageUpdated = Signal(QImage)
+    ImageUpdated = Signal(np.ndarray)
 
     def __init__(self, camera_url):
         super().__init__()
@@ -15,55 +21,34 @@ class Rtsp_camera(QThread):
         self.fps = 0
         self.true_fps = 0
         self.running = True
-
+        self.lpr = False
 
     def run(self):
+        print('rtsp run')
         cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
+        #cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
 
         if self.running == True:
             if cap.isOpened() == True:
                 while (cap.isOpened()):
                     ret, frame = cap.read()
-                    height, width, channels = frame.shape
-                    bytes_per_line = width * channels
+
                     if ret:
-                        cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+
+                        if self.lpr == True:
+                            lpr = Lpr_analytics()
+                            result = lpr.run_lpr(frame)
+                            self.ImageUpdated.emit(result)
+
                         #qt_rgb_image_scaled = qt_rgb_image.scaled(800, 600, Qt.KeepAspectRatio)
-                        self.ImageUpdated.emit(qt_rgb_image)
+                        self.ImageUpdated.emit(frame)
 
         else:
             cap.release()
 
-            #self.true_fps = cap.get(cv2.CAP_PROP_FPS)
-                #self.height, self.width, self.channels = frame.shape
-                #bytes_per_line = self.height * self.channels
+    def run_lpr(self):
+        self.lpr = True
 
-                #new_frame_time = time.time()
-                #try:
-                    #fps = 1 / (new_frame_time - self.prev_frame_time)
-                    #self.prev_frame_time = new_frame_time
-                #except:
-                    #pass
-                #self.fps = int(fps)
-
-                #time.sleep(fps)
-
-                #cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                #qt_rgb_image = QImage(cv_rgb_image.data, self.width, self.height, bytes_per_line, QImage.Format_RGB888)
-
-                #self.height = str(self.height)
-                #self.width = str(self.width)
-
-
-                #self.ImageUpdated.emit(qt_rgb_image)
-            cap.release()
 
     def stop_running(self):
         self.running = False
-
-
-
-

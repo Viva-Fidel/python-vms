@@ -2,6 +2,7 @@ from PySide6.QtCore import Slot, QObject
 from PySide6.QtGui import QPalette, QImage, QPixmap
 from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel
 
+from lpr_analytics import Lpr_analytics
 from webcamera import Webcamera
 
 class New_webcamera(QObject):
@@ -18,9 +19,12 @@ class New_webcamera(QObject):
         self.QScrollArea.setWidgetResizable(True)
         self.QScrollArea.setWidget(self.camera)
 
+
+
         self.capture_camera = Webcamera(self)
         self.capture_camera.ImageUpdated.connect(self.ShowCamera)
         self.capture_camera.start()
+
 
         return self.QScrollArea
 

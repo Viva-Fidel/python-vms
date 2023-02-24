@@ -9,11 +9,11 @@
 
 from PySide6.QtCore import (QCoreApplication,
                             QMetaObject, QObject, QRect,
-                            QSize, QTimer, Qt, Slot, Signal)
+                            QSize, QTimer, Qt, Slot, Signal, QSettings, QFileInfo)
 from PySide6.QtGui import (QIcon)
 from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QLineEdit, QFrame,
-                               QTreeWidget, QTreeWidgetItem,QHBoxLayout, QSpacerItem)
+                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QApplication, QCheckBox)
 
 import GPUtil
 import psutil
@@ -24,7 +24,10 @@ from add_new_webcam_event import New_webcamera
 
 import resources
 
+
 class Ui_MainWindow(object):
+
+    settings = QSettings("gui.ini", QSettings.IniFormat)
 
     # All possible positions in grid
     camera_position_in_grid = {
@@ -59,6 +62,7 @@ class Ui_MainWindow(object):
         super().__init__()
         self.actual_index = 0
         self.rtsp_index = 1
+
 
     # Setting up UI
     def setupUi(self, MainWindow):
@@ -262,10 +266,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.main_window_stackedWidget)
 
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
+
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Camera obscura VMS", None))
@@ -395,75 +401,86 @@ class Rtsp_page(QObject):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.rtsp_page_verticalLayout = QVBoxLayout()
         self.rtsp_page_verticalLayout.setObjectName(u"rtsp_page_verticalLayout")
-        self.rtsp_device_name_verticalLayout = QVBoxLayout()
-        self.rtsp_device_name_verticalLayout.setObjectName(u"rtsp_device_name_verticalLayout")
+        self.rtsp_page_device_name_verticalLayout = QVBoxLayout()
+        self.rtsp_page_device_name_verticalLayout.setObjectName(u"rtsp_page_device_name_verticalLayout")
         self.rtsp_device_name_label = QLabel(self.rtsp_page)
         self.rtsp_device_name_label.setObjectName(u"rtsp_device_name_label")
 
-        self.rtsp_device_name_verticalLayout.addWidget(self.rtsp_device_name_label)
+        self.rtsp_page_device_name_verticalLayout.addWidget(self.rtsp_device_name_label)
 
         self.rtsp_device_name_lineEdit = QLineEdit(self.rtsp_page)
         self.rtsp_device_name_lineEdit.setObjectName(u"rtsp_device_name_lineEdit")
         self.rtsp_device_name_lineEdit.setMaximumSize(QSize(250, 16777215))
 
-        self.rtsp_device_name_verticalLayout.addWidget(self.rtsp_device_name_lineEdit)
+        self.rtsp_page_device_name_verticalLayout.addWidget(self.rtsp_device_name_lineEdit)
 
-        self.rtsp_page_verticalLayout.addLayout(self.rtsp_device_name_verticalLayout)
+        self.rtsp_page_verticalLayout.addLayout(self.rtsp_page_device_name_verticalLayout)
 
-        self.rtsp_stream_url_verticalLayout = QVBoxLayout()
-        self.rtsp_stream_url_verticalLayout.setObjectName(u"rtsp_stream_url_verticalLayout")
+        self.rtsp_page_stream_url_verticalLayout = QVBoxLayout()
+        self.rtsp_page_stream_url_verticalLayout.setObjectName(u"rtsp_page_stream_url_verticalLayout")
         self.rtsp_stream_url_label = QLabel(self.rtsp_page)
         self.rtsp_stream_url_label.setObjectName(u"rtsp_stream_url_label")
 
-        self.rtsp_stream_url_verticalLayout.addWidget(self.rtsp_stream_url_label)
+        self.rtsp_page_stream_url_verticalLayout.addWidget(self.rtsp_stream_url_label)
 
         self.rtsp_stream_url_lineEdit = QLineEdit(self.rtsp_page)
         self.rtsp_stream_url_lineEdit.setObjectName(u"rtsp_stream_url_lineEdit")
         self.rtsp_stream_url_lineEdit.setMaximumSize(QSize(250, 16777215))
 
-        self.rtsp_stream_url_verticalLayout.addWidget(self.rtsp_stream_url_lineEdit)
+        self.rtsp_page_stream_url_verticalLayout.addWidget(self.rtsp_stream_url_lineEdit)
 
-        self.rtsp_page_verticalLayout.addLayout(self.rtsp_stream_url_verticalLayout)
+        self.rtsp_page_verticalLayout.addLayout(self.rtsp_page_stream_url_verticalLayout)
 
-        self.rtsp_actual_status_horizontalLayout = QHBoxLayout()
-        self.rtsp_actual_status_horizontalLayout.setObjectName(u"rtsp_actual_status_horizontalLayout")
+        self.rtsp_page_actual_status_horizontalLayout = QHBoxLayout()
+        self.rtsp_page_actual_status_horizontalLayout.setObjectName(u"rtsp_page_actual_status_horizontalLayout")
         self.rtsp_status_label = QLabel(self.rtsp_page)
         self.rtsp_status_label.setObjectName(u"rtsp_status_label")
 
-        self.rtsp_actual_status_horizontalLayout.addWidget(self.rtsp_status_label)
+        self.rtsp_page_actual_status_horizontalLayout.addWidget(self.rtsp_status_label)
 
         self.rtsp_actual_status_label = QLabel(self.rtsp_page)
         self.rtsp_actual_status_label.setObjectName(u"rtsp_actual_status_label")
 
-        self.rtsp_actual_status_horizontalLayout.addWidget(self.rtsp_actual_status_label)
+        self.rtsp_page_actual_status_horizontalLayout.addWidget(self.rtsp_actual_status_label)
 
         self.rtsp_actual_status_horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.rtsp_actual_status_horizontalLayout.addItem(self.rtsp_actual_status_horizontalSpacer)
+        self.rtsp_page_actual_status_horizontalLayout.addItem(self.rtsp_actual_status_horizontalSpacer)
 
-        self.rtsp_page_verticalLayout.addLayout(self.rtsp_actual_status_horizontalLayout)
+        self.rtsp_page_verticalLayout.addLayout(self.rtsp_page_actual_status_horizontalLayout)
 
-        self.rtsp_buttons_horizontalLayout = QHBoxLayout()
-        self.rtsp_buttons_horizontalLayout.setObjectName(u"rtsp_buttons_horizontalLayout")
+        self.rtsp_page_buttons_horizontalLayout = QHBoxLayout()
+        self.rtsp_page_buttons_horizontalLayout.setObjectName(u"rtsp_page_buttons_horizontalLayout")
         self.rtsp_enable_pushButton = QPushButton(self.rtsp_page)
         self.rtsp_enable_pushButton.setObjectName(u"rtsp_enable_pushButton")
 
-        self.rtsp_buttons_horizontalLayout.addWidget(self.rtsp_enable_pushButton)
+        self.rtsp_page_buttons_horizontalLayout.addWidget(self.rtsp_enable_pushButton)
 
         self.rtsp_delete_pushButton = QPushButton(self.rtsp_page)
         self.rtsp_delete_pushButton.setObjectName(u"rtsp_delete_pushButton")
 
-        self.rtsp_buttons_horizontalLayout.addWidget(self.rtsp_delete_pushButton)
+        self.rtsp_page_buttons_horizontalLayout.addWidget(self.rtsp_delete_pushButton)
 
         self.rtsp_buttons_horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.rtsp_buttons_horizontalLayout.addItem(self.rtsp_buttons_horizontalSpacer)
+        self.rtsp_page_buttons_horizontalLayout.addItem(self.rtsp_buttons_horizontalSpacer)
 
-        self.rtsp_page_verticalLayout.addLayout(self.rtsp_buttons_horizontalLayout)
+        self.rtsp_page_verticalLayout.addLayout(self.rtsp_page_buttons_horizontalLayout)
 
-        self.rtsp_page_verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.rtsp_page_analytics_checkboxes_verticalLayout = QVBoxLayout()
+        self.rtsp_page_analytics_checkboxes_verticalLayout.setObjectName(
+            u"rtsp_page_analytics_checkboxes_verticalLayout")
+        self.rtsp_run_lpr_checkBox = QCheckBox(self.rtsp_page)
+        self.rtsp_run_lpr_checkBox.setObjectName(u"rtsp_run_lpr_checkBox")
 
-        self.rtsp_page_verticalLayout.addItem(self.rtsp_page_verticalSpacer)
+        self.rtsp_page_analytics_checkboxes_verticalLayout.addWidget(self.rtsp_run_lpr_checkBox)
+
+        self.rtsp_page_analytics_checkboxes_verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum,
+                                                                         QSizePolicy.Expanding)
+
+        self.rtsp_page_analytics_checkboxes_verticalLayout.addItem(self.rtsp_page_analytics_checkboxes_verticalSpacer)
+
+        self.rtsp_page_verticalLayout.addLayout(self.rtsp_page_analytics_checkboxes_verticalLayout)
 
         self.verticalLayout_3.addLayout(self.rtsp_page_verticalLayout)
 
@@ -474,6 +491,7 @@ class Rtsp_page(QObject):
         self.rtsp_delete_pushButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.rtsp_status_label.setText(QCoreApplication.translate("MainWindow", u"Status:", None))
         self.rtsp_actual_status_label.setText(QCoreApplication.translate("MainWindow", u"Disabled", None))
+        self.rtsp_run_lpr_checkBox.setText(QCoreApplication.translate("MainWindow", u"Run LPR", None))
 
         self.rtsp_device_name_lineEdit.setText(self.rtsp_name)
         self.rtsp_device_name_lineEdit.textChanged.connect(lambda: self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text()))
@@ -481,8 +499,17 @@ class Rtsp_page(QObject):
         self.rtsp_enable_pushButton.clicked.connect(self.enable_disable_rtsp_cam)
         self.rtsp_delete_pushButton.clicked.connect(self.delete_rtsp_cam)
 
+        self.rtsp_run_lpr_checkBox.stateChanged.connect(self.check_button_status)
+
 
         return self.rtsp_page
+
+    def check_button_status(self):
+        if self.rtsp_run_lpr_checkBox.isChecked() == True:
+            self.new_camera.run_lpr()
+        else:
+            pass
+
 
     def enable_disable_rtsp_cam(self):
         if self.status == False:
@@ -533,7 +560,6 @@ class Webcam_page(QObject):
     webcam_update_main_gui_delete = Signal(QWidget)
     webcam_delete_page = Signal(int)
 
-
     def __init__(self, webcam_name, webcam_left_menu_name):
         super().__init__()
         self.webcam_name = webcam_name
@@ -542,10 +568,8 @@ class Webcam_page(QObject):
     def setupGUi(self):
         self.webcam_page = QWidget()
         self.webcam_page.setObjectName(u"webcam_page")
-        self.verticalLayout_2 = QVBoxLayout(self.webcam_page)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.webcam_page_verticalLayout = QVBoxLayout()
-        self.webcam_page_verticalLayout.setObjectName(u"webcam_page_verticalLayout")
+        self.verticalLayout_5 = QVBoxLayout(self.webcam_page)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.webcam_page_device_name_verticalLayout = QVBoxLayout()
         self.webcam_page_device_name_verticalLayout.setObjectName(u"webcam_page_device_name_verticalLayout")
         self.webcam_device_name_label = QLabel(self.webcam_page)
@@ -559,7 +583,7 @@ class Webcam_page(QObject):
 
         self.webcam_page_device_name_verticalLayout.addWidget(self.webcam_device_name_lineEdit)
 
-        self.webcam_page_verticalLayout.addLayout(self.webcam_page_device_name_verticalLayout)
+        self.verticalLayout_5.addLayout(self.webcam_page_device_name_verticalLayout)
 
         self.webcam_page_status_horizontalLayout = QHBoxLayout()
         self.webcam_page_status_horizontalLayout.setObjectName(u"webcam_page_status_horizontalLayout")
@@ -577,7 +601,7 @@ class Webcam_page(QObject):
 
         self.webcam_page_status_horizontalLayout.addItem(self.webcam_page_status_horizontalSpacer)
 
-        self.webcam_page_verticalLayout.addLayout(self.webcam_page_status_horizontalLayout)
+        self.verticalLayout_5.addLayout(self.webcam_page_status_horizontalLayout)
 
         self.webcam_page_buttons_horizontalLayout = QHBoxLayout()
         self.webcam_page_buttons_horizontalLayout.setObjectName(u"webcam_page_buttons_horizontalLayout")
@@ -595,19 +619,30 @@ class Webcam_page(QObject):
 
         self.webcam_page_buttons_horizontalLayout.addItem(self.webcam_page_buttons_horizontalSpacer)
 
-        self.webcam_page_verticalLayout.addLayout(self.webcam_page_buttons_horizontalLayout)
+        self.verticalLayout_5.addLayout(self.webcam_page_buttons_horizontalLayout)
 
-        self.webcam_page_verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.webcam_page_analytics_checkboxes_verticalLayout = QVBoxLayout()
+        self.webcam_page_analytics_checkboxes_verticalLayout.setObjectName(
+            u"webcam_page_analytics_checkboxes_verticalLayout")
+        self.webcam_run_lpr_checkBox = QCheckBox(self.webcam_page)
+        self.webcam_run_lpr_checkBox.setObjectName(u"webcam_run_lpr_checkBox")
 
-        self.webcam_page_verticalLayout.addItem(self.webcam_page_verticalSpacer)
+        self.webcam_page_analytics_checkboxes_verticalLayout.addWidget(self.webcam_run_lpr_checkBox)
 
-        self.verticalLayout_2.addLayout(self.webcam_page_verticalLayout)
+        self.webcam_page_analytics_checkboxes_verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum,
+                                                                           QSizePolicy.Expanding)
+
+        self.webcam_page_analytics_checkboxes_verticalLayout.addItem(
+            self.webcam_page_analytics_checkboxes_verticalSpacer)
+
+        self.verticalLayout_5.addLayout(self.webcam_page_analytics_checkboxes_verticalLayout)
 
         self.webcam_device_name_label.setText(QCoreApplication.translate("MainWindow", u"Device name:", None))
         self.webcam_enable_pushButton.setText(QCoreApplication.translate("MainWindow", u"Enable", None))
         self.webcam_delete_pushButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.webcam_status_label.setText(QCoreApplication.translate("MainWindow", u"Status:", None))
         self.webcam_actual_status_label.setText(QCoreApplication.translate("MainWindow", u"Disabled", None))
+        self.webcam_run_lpr_checkBox.setText(QCoreApplication.translate("MainWindow", u"Run LPR", None))
 
         self.webcam_device_name_lineEdit.setText(self.webcam_name)
         self.webcam_device_name_lineEdit.textChanged.connect(lambda: self.webcam_left_menu_name.setText(0, self.webcam_device_name_lineEdit.text()))
@@ -615,6 +650,7 @@ class Webcam_page(QObject):
         self.webcam_enable_pushButton.clicked.connect(self.enable_disable_webcam)
 
         self.webcam_delete_pushButton.clicked.connect(self.delete_webcam)
+
 
         return self.webcam_page
 

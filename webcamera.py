@@ -27,7 +27,7 @@ class Webcamera(QThread):
                         cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                         qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
                         #qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
-                        self.ImageUpdated.emit(cv_rgb_image)
+                        self.ImageUpdated.emit(qt_rgb_image)
 
         else:
             cap.release()
@@ -58,6 +58,7 @@ class Webcamera(QThread):
                 #self.ImageUpdated.emit(qt_rgb_image)
     def stop_running(self):
         self.running = False
+
 
 
 

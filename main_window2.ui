@@ -220,94 +220,101 @@
        </layout>
       </widget>
       <widget class="QWidget" name="webcam_page">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QVBoxLayout" name="webcam_page_verticalLayout">
+         <layout class="QVBoxLayout" name="webcam_page_device_name_verticalLayout">
           <item>
-           <layout class="QVBoxLayout" name="webcam_page_device_name_verticalLayout">
-            <item>
-             <widget class="QLabel" name="webcam_device_name_label">
-              <property name="text">
-               <string>Device name:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="webcam_device_name_lineEdit">
-              <property name="maximumSize">
-               <size>
-                <width>200</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLabel" name="webcam_device_name_label">
+            <property name="text">
+             <string>Device name:</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="webcam_page_status_horizontalLayout">
-            <item>
-             <widget class="QLabel" name="webcam_status_label">
-              <property name="text">
-               <string>Status:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="webcam_actual_status_label">
-              <property name="text">
-               <string>Disabled</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="webcam_page_status_horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+           <widget class="QLineEdit" name="webcam_device_name_lineEdit">
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="webcam_page_status_horizontalLayout">
+          <item>
+           <widget class="QLabel" name="webcam_status_label">
+            <property name="text">
+             <string>Status:</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="webcam_page_buttons_horizontalLayout">
-            <item>
-             <widget class="QPushButton" name="webcam_enable_pushButton">
-              <property name="text">
-               <string>Enable</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="webcam_delete_pushButton">
-              <property name="text">
-               <string>Delete</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="webcam_page_buttons_horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+           <widget class="QLabel" name="webcam_actual_status_label">
+            <property name="text">
+             <string>Disabled</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <spacer name="webcam_page_verticalSpacer">
+           <spacer name="webcam_page_status_horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="webcam_page_buttons_horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="webcam_enable_pushButton">
+            <property name="text">
+             <string>Enable</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="webcam_delete_pushButton">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="webcam_page_buttons_horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="webcam_page_analytics_checkboxes_verticalLayout">
+          <item>
+           <widget class="QCheckBox" name="webcam_run_lpr_checkBox">
+            <property name="text">
+             <string>Run LPR</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="webcam_page_analytics_checkboxes_verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -328,7 +335,7 @@
         <item>
          <layout class="QVBoxLayout" name="rtsp_page_verticalLayout">
           <item>
-           <layout class="QVBoxLayout" name="rtsp_device_name_verticalLayout">
+           <layout class="QVBoxLayout" name="rtsp_page_device_name_verticalLayout">
             <item>
              <widget class="QLabel" name="rtsp_device_name_label">
               <property name="text">
@@ -349,7 +356,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="rtsp_stream_url_verticalLayout">
+           <layout class="QVBoxLayout" name="rtsp_page_stream_url_verticalLayout">
             <item>
              <widget class="QLabel" name="rtsp_stream_url_label">
               <property name="text">
@@ -370,7 +377,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="rtsp_actual_status_horizontalLayout">
+           <layout class="QHBoxLayout" name="rtsp_page_actual_status_horizontalLayout">
             <item>
              <widget class="QLabel" name="rtsp_status_label">
               <property name="text">
@@ -401,7 +408,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="rtsp_buttons_horizontalLayout">
+           <layout class="QHBoxLayout" name="rtsp_page_buttons_horizontalLayout">
             <item>
              <widget class="QPushButton" name="rtsp_enable_pushButton">
               <property name="text">
@@ -432,17 +439,28 @@
            </layout>
           </item>
           <item>
-           <spacer name="rtsp_page_verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
+           <layout class="QVBoxLayout" name="rtsp_page_analytics_checkboxes_verticalLayout">
+            <item>
+             <widget class="QCheckBox" name="rtsp_run_lpr_checkBox">
+              <property name="text">
+               <string>Run LPR</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="rtsp_page_analytics_checkboxes_verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
