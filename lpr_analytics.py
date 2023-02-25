@@ -28,8 +28,7 @@ class Lpr_analytics:
         plate = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
         results = Lpr_analytics.OCR_model(plate)
         list_results = results.xyxyn[0].cpu().detach().numpy()
-        sorted_results = sorted(list_results, key=lambda x: x[0])
-        print([arr[5] for arr in sorted_results])
+        sorted_results = sorted(list_results, key=lambda x: (x[0], x[1]))
         labels, cordinates = [arr[5] for arr in sorted_results], [arr[:-1] for arr in sorted_results]
 
         n = len(labels)
@@ -38,8 +37,22 @@ class Lpr_analytics:
 
         for i in range(n):
             row = cordinates[i]
-            if row[4] >= 0.80:
+            if row[4] >= 0.60:
                 detected_characters.append(self.class_to_label(labels[i]))
+
+        try:
+            for k in range(6):
+                if k <= 2:
+                    if detected_characters[k] == 'i':
+                        detected_characters[k] = 'I'
+                    elif detected_characters[k] == '0':
+                        detected_characters[k] = 'O'
+                elif k >= 3:
+                    if detected_characters[k] == 'i':
+                        detected_characters[k] = '1'
+        except:
+            pass
+
         print(detected_characters)
         self.detections = detected_characters
 
