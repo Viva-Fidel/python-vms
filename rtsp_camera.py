@@ -17,16 +17,12 @@ class Rtsp_camera(QThread):
         super().__init__()
 
         self.camera_url = camera_url
-        self.prev_frame_time = 0
-        self.fps = 0
-        self.true_fps = 0
         self.running = True
-        self.lpr = False
+        self.lpr_analytics = False
 
     def run(self):
-        print('rtsp run')
+
         cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
-        #cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
 
         if self.running == True:
             if cap.isOpened() == True:
@@ -35,10 +31,9 @@ class Rtsp_camera(QThread):
 
                     if ret:
 
-                        if self.lpr == True:
+                        if self.lpr_analytics == True:
                             lpr = Lpr_analytics()
-                            result = lpr.run_lpr(frame)
-                            self.ImageUpdated.emit(result)
+                            lpr.run_lpr(frame)
 
                         #qt_rgb_image_scaled = qt_rgb_image.scaled(800, 600, Qt.KeepAspectRatio)
                         self.ImageUpdated.emit(frame)
@@ -47,8 +42,10 @@ class Rtsp_camera(QThread):
             cap.release()
 
     def run_lpr(self):
-        self.lpr = True
+        self.lpr_analytics = True
 
+    def stop_lpr(self):
+        self.lpr_analytics = False
 
     def stop_running(self):
         self.running = False

@@ -499,16 +499,16 @@ class Rtsp_page(QObject):
         self.rtsp_enable_pushButton.clicked.connect(self.enable_disable_rtsp_cam)
         self.rtsp_delete_pushButton.clicked.connect(self.delete_rtsp_cam)
 
-        self.rtsp_run_lpr_checkBox.stateChanged.connect(self.check_button_status)
+        self.rtsp_run_lpr_checkBox.stateChanged.connect(self.check_lpr_button_status)
 
 
         return self.rtsp_page
 
-    def check_button_status(self):
+    def check_lpr_button_status(self):
         if self.rtsp_run_lpr_checkBox.isChecked() == True:
             self.new_camera.run_lpr()
         else:
-            pass
+            self.new_camera.stop_lpr()
 
 
     def enable_disable_rtsp_cam(self):
@@ -651,8 +651,16 @@ class Webcam_page(QObject):
 
         self.webcam_delete_pushButton.clicked.connect(self.delete_webcam)
 
+        self.webcam_run_lpr_checkBox.stateChanged.connect(self.check_webcam_button_status)
+
 
         return self.webcam_page
+
+    def check_webcam_button_status(self):
+        if self.webcam_run_lpr_checkBox.isChecked() == True:
+            self.new_camera.run_lpr()
+        else:
+            self.new_camera.stop_lpr()
 
     def enable_disable_webcam(self):
         # Enable

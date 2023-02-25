@@ -33,7 +33,6 @@ class New_rtsp_camera(QObject):
 
     @Slot(np.ndarray)
     def ShowCamera(self, frame):
-
         height, width, channels = frame.shape
         bytes_per_line = width * channels
         cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -47,6 +46,9 @@ class New_rtsp_camera(QObject):
 
     def run_lpr(self):
         self.capture_camera.run_lpr()
+
+    def stop_lpr(self):
+        self.capture_camera.stop_lpr()
 
     def __del__(self):
         print("Object is deleted")

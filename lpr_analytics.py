@@ -7,15 +7,12 @@ import cv2
 
 class Lpr_analytics:
 
-    LPRupdateimage = Signal(np.ndarray)
-
     print(torch.cuda.is_available())
     lpr_model = torch.hub.load('yolov5', 'custom', source='local', path='modules/number_plates_detection.onnx')
     OCR_model = torch.hub.load('yolov5', 'custom', source='local', path='modules/numbers_recognition.onnx')
 
     def __init__(self):
         super().__init__()
-        self.frame_count = 0
         self.detections = ["Not defined"]
         self.plate_detected = False
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -57,7 +54,6 @@ class Lpr_analytics:
         self.detections = detected_characters
 
 
-
     def run_lpr(self, frame):
         results = Lpr_analytics.lpr_model(frame)
         labels, cordinates = results.xyxyn[0][:, -1], results.xyxyn[0][:, :-1]
@@ -67,7 +63,7 @@ class Lpr_analytics:
         for i in range(n):
             row = cordinates[i]
                 
-            if row[4] >= 0.70:
+            if row[4] >= 0.80:
                 x1, y1, x2, y2 = int(row[0] * x_shape), int((row[1] * y_shape)), int(
                         row[2] * x_shape), int((row[3] * y_shape))
                 plate = frame[y1:y2, x1:x2]

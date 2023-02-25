@@ -1,9 +1,11 @@
+import numpy as np
 from PySide6.QtCore import Slot, QObject
 from PySide6.QtGui import QPalette, QImage, QPixmap
 from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel
 
 from lpr_analytics import Lpr_analytics
 from webcamera import Webcamera
+import cv2
 
 class New_webcamera(QObject):
     def __init__(self):
@@ -28,13 +30,23 @@ class New_webcamera(QObject):
 
         return self.QScrollArea
 
-    @Slot(QImage)
+    @Slot(np.ndarray)
     def ShowCamera(self, frame):
-        self.camera.setPixmap(QPixmap.fromImage(frame))
+        height, width, channels = frame.shape
+        bytes_per_line = width * channels
+        cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        self.camera.setPixmap(QPixmap.fromImage(qt_rgb_image))
 
     def stop_camera(self):
         self.capture_camera.stop_running()
         self.capture_camera.terminate()
+
+    def run_lpr(self):
+        self.capture_camera.run_lpr()
+
+    def stop_lpr(self):
+        self.capture_camera.stop_lpr()
 
     def __del__(self):
         print("Object is deleted")
