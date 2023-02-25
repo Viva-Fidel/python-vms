@@ -266,7 +266,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.main_window_stackedWidget)
 
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
@@ -315,9 +314,10 @@ class Ui_MainWindow(object):
     "____________________________________________________"
 
     # Slot to delete camera in gridLayout
-    @Slot(QWidget)
-    def delete_cameras_page_gridLayout(self, camera_func):
-            camera_func.deleteLater()
+    @Slot(QWidget, QWidget)
+    def delete_cameras_page_gridLayout(self, camera_func, rtsp_widget):
+        rtsp_widget.deleteLater()
+        camera_func.deleteLater()
 
     "____________________________________________________"
 
@@ -384,7 +384,7 @@ class Ui_MainWindow(object):
 # Class to add a camera using RTSP
 class Rtsp_page(QObject):
     rtsp_update_main_gui_add = Signal(QWidget, int, int)
-    rtsp_update_main_gui_delete = Signal(QWidget)
+    rtsp_update_main_gui_delete = Signal(QWidget, QWidget)
     rtsp_delete_page = Signal(int)
 
     def __init__(self, rtsp_name, rtsp_left_menu_name):
@@ -539,17 +539,18 @@ class Rtsp_page(QObject):
                     break
     def delete_rtsp_cam(self):
         if self.status == True:
-            try:
-                self.new_camera.stop_camera()
-                for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                    if v == self.new_camera:
-                        self.rtsp_update_main_gui_delete.emit(self.cam_status)
-                        Ui_MainWindow.camera_position_in_grid[k] = None
-            except:
-                pass
+            self.new_camera.stop_camera()
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v == self.new_camera:
+                    self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
+                    Ui_MainWindow.camera_position_in_grid[k] = None
+                    break
             self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
         elif self.status == False:
+            self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
             self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
+    def __del__(self):
+        print("Rtsp cam is deleted")
 
 "____________________________________________________"
 
@@ -557,7 +558,7 @@ class Rtsp_page(QObject):
 
 class Webcam_page(QObject):
     webcam_update_main_gui = Signal(QWidget, int, int)
-    webcam_update_main_gui_delete = Signal(QWidget)
+    webcam_update_main_gui_delete = Signal(QWidget, QWidget)
     webcam_delete_page = Signal(int)
 
     def __init__(self, webcam_name, webcam_left_menu_name):
@@ -697,10 +698,14 @@ class Webcam_page(QObject):
                 self.new_camera.stop_camera()
                 for k, v in Ui_MainWindow.camera_position_in_grid.items():
                     if v == self.new_camera:
-                        self.webcam_update_main_gui_delete.emit(self.cam_status)
+                        self.webcam_update_main_gui_delete.emit(self.cam_status, self.webcam_page)
                         Ui_MainWindow.camera_position_in_grid[k] = None
             except:
                 pass
             self.webcam_delete_page.emit(Ui_MainWindow.user_current_position)
         elif self.status == False:
+            self.webcam_update_main_gui_delete.emit(None, self.webcam_page)
             self.webcam_delete_page.emit(Ui_MainWindow.user_current_position)
+
+    def __del__(self):
+        print("webcam is deleted")
