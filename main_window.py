@@ -257,7 +257,7 @@ class Ui_MainWindow(object):
         "____________________________________________________"
         # Dialog to add new cameras
 
-        self.add_new_camera_pushButton.clicked.connect(self.add_new_camera_dialog)
+        self.add_new_camera_pushButton.clicked.connect(self.add_new_cam_dialog)
 
         "____________________________________________________"
 
@@ -339,6 +339,7 @@ class Ui_MainWindow(object):
 
     "____________________________________________________"
     # Slot to hide or show cameras in gridLayout
+    # camera func - video that we want to expand
     @Slot(QWidget)
     def expand_hide_camera(self, camera_func):
         if self.expanded == False:
@@ -362,29 +363,32 @@ class Ui_MainWindow(object):
         Dialog.exec()
         if adding_new_cam.choice_value == 'rtsp':
             self.rtsp = QTreeWidgetItem(self.settings)
-            if self.rtsp_index == 1: # Прописать логику и починить
-                self.rtsp_name = 'RTSP'
-                self.rtsp.setText(0, self.rtsp_name)
-                self.rtsp_index += 1
-            else:
-                self.rtsp_name = f'RTSP {self.rtsp_index}'
-                self.rtsp.setText(0, self.rtsp_name)
-                self.rtsp_index += 1
+            #if self.rtsp_index == 1:
+                #self.rtsp_name = 'RTSP'
+                #self.rtsp.setText(0, self.rtsp_name)
+                #self.rtsp_index += 1
+            #else:
+                #self.rtsp_name = f'RTSP {self.rtsp_index}'
+                #self.rtsp.setText(0, self.rtsp_name)
+                #self.rtsp_index += 1
 
-            for k, v in Ui_MainWindow.tree_widget_list.items():
+            self.rtsp_name = 'RTSP'
+            self.rtsp.setText(0, self.rtsp_name)
+
+            for k, v in Ui_MainWindow.left_menu_tree_widget_list.items():
                 if v == None:
                     self.actual_index = k
-                    Ui_MainWindow.tree_widget_list[k] = self.rtsp
+                    Ui_MainWindow.left_menu_tree_widget_list[k] = self.rtsp
                     break
 
             self.rtsp.setData(0, Qt.UserRole, self.actual_index)
 
-            # Creating camera class
+            # Creating camera class and connecting it to signals
             self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp)
-            self.rtsp_page.rtsp_update_main_gui_add.connect(self.add_cameras_page_gridLayout)
-            self.rtsp_page.rtsp_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)
-            self.rtsp_page.rtsp_delete_page.connect(self.delete_qtree_item)
-            self.rtsp_page.rtsp_show_hide.connect(self.expand_hide_camera)
+            self.rtsp_page.rtsp_update_main_gui_add.connect(self.add_cameras_page_gridLayout) # add camera to grid
+            self.rtsp_page.rtsp_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout) # delete camera from grid
+            self.rtsp_page.rtsp_left_menu_delete_page.connect(self.delete_qtree_item) # delete from left menu
+            self.rtsp_page.rtsp_show_hide_camera_action.connect(self.expand_hide_camera) # expand or hide camera
             self.main_window_stackedWidget.addWidget(self.rtsp_page.setupGUi())
 
         elif adding_new_cam.choice_value == 'webcam':
@@ -392,17 +396,20 @@ class Ui_MainWindow(object):
             self.webcam_name = 'Webcam'
             self.webcam.setText(0, self.webcam_name)
 
-            for k, v in Ui_MainWindow.tree_widget_list.items():
+            for k, v in Ui_MainWindow.left_menu_tree_widget_list.items():
                 if v == None:
                     self.actual_index = k
-                    Ui_MainWindow.tree_widget_list[k] = self.webcam
+                    Ui_MainWindow.left_menu_tree_widget_list[k] = self.webcam
                     break
 
             self.webcam.setData(0, Qt.UserRole, self.actual_index)
+
+            # Creating camera class and connecting it to signals
             self.webcam_page = Webcam_page(self.webcam_name, self.webcam)
-            self.webcam_page.webcam_update_main_gui.connect(self.add_cameras_page_gridLayout)
-            self.webcam_page.webcam_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)
-            self.webcam_page.webcam_delete_page.connect(self.delete_qtree_item)
+            self.webcam_page.webcam_update_main_gui.connect(self.add_cameras_page_gridLayout) # add camera to grid
+            self.webcam_page.webcam_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout) # delete camera from grid
+            self.webcam_page.webcam_left_menu_delete_page.connect(self.delete_qtree_item) # delete from left menu
+            self.webcam_page.webcam_show_hide_camera_action.connect(self.expand_hide_camera) # expand or hide camera
             self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
 
 "____________________________________________________"
@@ -411,8 +418,8 @@ class Ui_MainWindow(object):
 class Rtsp_page(QObject):
     rtsp_update_main_gui_add = Signal(QWidget, int, int)
     rtsp_update_main_gui_delete = Signal(QWidget, QWidget)
-    rtsp_delete_page = Signal(int)
-    rtsp_show_hide = Signal(QWidget)
+    rtsp_left_menu_delete_page = Signal(int)
+    rtsp_show_hide_camera_action = Signal(QWidget)
 
     def __init__(self, rtsp_name, rtsp_left_menu_name):
         super().__init__()
@@ -512,7 +519,6 @@ class Rtsp_page(QObject):
 
         self.verticalLayout_3.addLayout(self.rtsp_page_verticalLayout)
 
-
         self.rtsp_device_name_label.setText(QCoreApplication.translate("MainWindow", u"Device name:", None))
         self.rtsp_stream_url_label.setText(QCoreApplication.translate("MainWindow", u"Stream URL:", None))
         self.rtsp_enable_pushButton.setText(QCoreApplication.translate("MainWindow", u"Enable", None))
@@ -555,14 +561,14 @@ class Rtsp_page(QObject):
                         self.rtsp_enable_pushButton.setText("Disable")
                         self.rtsp_actual_status_label.setText("Enabled")
                         self.status = True
-                        #self.new_camera.QScrollArea.installEventFilter(self)
+                        self.new_camera.QScrollArea.installEventFilter(self)
                         break
 
         elif self.status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
-                    #self.new_camera.QScrollArea.removeEventFilter(self)
+                    self.new_camera.QScrollArea.removeEventFilter(self)
                     self.rtsp_update_main_gui_delete.emit(self.cam_status)
                     self.rtsp_enable_pushButton.setText("Enable")
                     self.rtsp_actual_status_label.setText("Disabled")
@@ -578,16 +584,15 @@ class Rtsp_page(QObject):
                     self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
-            self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
+            self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
         elif self.status == False:
-            self.new_camera.QScrollArea.removeEventFilter(self)
             self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
-            self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
+            self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonDblClick:
             if obj:
-                self.rtsp_show_hide.emit(self.new_camera)
+                self.rtsp_show_hide_camera_action.emit(self.new_camera)
         return super().eventFilter(obj, event)
 
     def __del__(self):
@@ -600,7 +605,8 @@ class Rtsp_page(QObject):
 class Webcam_page(QObject):
     webcam_update_main_gui = Signal(QWidget, int, int)
     webcam_update_main_gui_delete = Signal(QWidget, QWidget)
-    webcam_delete_page = Signal(int)
+    webcam_left_menu_delete_page = Signal(int)
+    webcam_show_hide_camera_action = Signal(QWidget)
 
     def __init__(self, webcam_name, webcam_left_menu_name):
         super().__init__()
@@ -719,6 +725,7 @@ class Webcam_page(QObject):
                         self.webcam_enable_pushButton.setText("Disable")
                         self.webcam_actual_status_label.setText("Enabled")
                         self.status = True
+                        self.new_camera.QScrollArea.installEventFilter(self)
                         break
 
         # Disable
@@ -731,6 +738,7 @@ class Webcam_page(QObject):
                     self.webcam_actual_status_label.setText("Disabled")
                     self.status = False
                     Ui_MainWindow.camera_position_in_grid[k] = None
+                    self.new_camera.QScrollArea.removeEventFilter(self)
                     break
 
     def delete_webcam(self):
@@ -741,12 +749,19 @@ class Webcam_page(QObject):
                     if v == self.new_camera:
                         self.webcam_update_main_gui_delete.emit(self.cam_status, self.webcam_page)
                         Ui_MainWindow.camera_position_in_grid[k] = None
+                        self.new_camera.QScrollArea.removeEventFilter(self)
             except:
                 pass
-            self.webcam_delete_page.emit(Ui_MainWindow.user_current_position)
+            self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
         elif self.status == False:
             self.webcam_update_main_gui_delete.emit(None, self.webcam_page)
-            self.webcam_delete_page.emit(Ui_MainWindow.user_current_position)
+            self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonDblClick:
+            if obj:
+                self.webcam_show_hide_camera_action.emit(self.new_camera)
+        return super().eventFilter(obj, event)
 
     def __del__(self):
         print("webcam is deleted")
