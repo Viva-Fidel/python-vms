@@ -4,6 +4,7 @@ from PySide6.QtCore import QThread, Slot, Signal, QObject
 
 import cv2
 
+import asyncio
 
 class Lpr_analytics:
 
@@ -20,7 +21,7 @@ class Lpr_analytics:
     def class_to_label(self, x):
         return Lpr_analytics.OCR_model.names[int(x)]
 
-    def detect_characters(self, plate):
+    async def detect_characters(self, plate):
         plate = cv2.resize(plate, (416, 416))
         plate = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
         results = Lpr_analytics.OCR_model(plate)
@@ -53,8 +54,7 @@ class Lpr_analytics:
         print(detected_characters)
         self.detections = detected_characters
 
-
-    def run_lpr(self, frame):
+    async def run_lpr(self, frame):
         results = Lpr_analytics.lpr_model(frame)
         labels, cordinates = results.xyxyn[0][:, -1], results.xyxyn[0][:, :-1]
         x_shape, y_shape = frame.shape[1], frame.shape[0]
@@ -68,7 +68,7 @@ class Lpr_analytics:
                         row[2] * x_shape), int((row[3] * y_shape))
                 plate = frame[y1:y2, x1:x2]
                 if self.plate_detected == False:
-                    self.detect_characters(plate)
+                    await self.detect_characters(plate)
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     cv2.rectangle(frame, (x1, y1 - 20), (x2, y1), (0, 255, 0), -1)
                     cv2.putText(frame, f"{''.join(self.detections)}", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)

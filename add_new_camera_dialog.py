@@ -8,20 +8,15 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
-    QDialogButtonBox, QSizePolicy, QWidget)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, Qt)
+from PySide6.QtWidgets import (QCheckBox, QDialogButtonBox)
+
 
 class Ui_Add_new_cam_dialog(object):
 
     def __init__(self):
         self.choice_value = None
+
     def setupUi(self, Add_new_cam_dialog):
         if not Add_new_cam_dialog.objectName():
             Add_new_cam_dialog.setObjectName(u"Add_new_cam_dialog")
@@ -30,7 +25,7 @@ class Ui_Add_new_cam_dialog(object):
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setGeometry(QRect(30, 80, 341, 32))
         self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         self.rtsp_checkBox = QCheckBox(Add_new_cam_dialog)
         self.rtsp_checkBox.setObjectName(u"rtsp_checkBox")
         self.rtsp_checkBox.setGeometry(QRect(10, 30, 61, 21))
@@ -47,6 +42,7 @@ class Ui_Add_new_cam_dialog(object):
         self.buttonBox.rejected.connect(Add_new_cam_dialog.reject)
 
         QMetaObject.connectSlotsByName(Add_new_cam_dialog)
+
     # setupUi
 
     def retranslateUi(self, Add_new_cam_dialog):
@@ -54,7 +50,11 @@ class Ui_Add_new_cam_dialog(object):
         self.rtsp_checkBox.setText(QCoreApplication.translate("Add_new_cam_dialog", u"RTSP", None))
         self.onvif_checkBox.setText(QCoreApplication.translate("Add_new_cam_dialog", u"Onvif", None))
         self.webcam_checkBox.setText(QCoreApplication.translate("Add_new_cam_dialog", u"Webcam", None))
+
     # retranslateUi
+
+    "____________________________________________________"
+    # Return choice from dialog
 
     def return_choice(self):
         if self.rtsp_checkBox.isChecked():

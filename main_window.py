@@ -9,11 +9,11 @@
 
 from PySide6.QtCore import (QCoreApplication,
                             QMetaObject, QObject, QRect,
-                            QSize, QTimer, Qt, Slot, Signal, QSettings, QFileInfo)
+                            QSize, QTimer, Qt, Slot, Signal, QEvent)
 from PySide6.QtGui import (QIcon)
 from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QLineEdit, QFrame,
-                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QApplication, QCheckBox)
+                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox)
 
 import GPUtil
 import psutil
@@ -27,9 +27,7 @@ import resources
 
 class Ui_MainWindow(object):
 
-    settings = QSettings("gui.ini", QSettings.IniFormat)
-
-    # All possible positions in grid
+    # All possible cameras positions in grid widget
     camera_position_in_grid = {
         (0, 0): None,
         (0, 1): None,
@@ -42,8 +40,8 @@ class Ui_MainWindow(object):
         (2, 2): None
     }
 
-    # All possible tree widget
-    tree_widget_list = {
+    # All possible tree widgets
+    left_menu_tree_widget_list = {
         3: None,
         4: None,
         5: None,
@@ -56,7 +54,7 @@ class Ui_MainWindow(object):
     }
 
     # Current position of user in menu
-    user_current_position = 0
+    user_current_position_in_tree_widget_list = 0
 
     def __init__(self):
         super().__init__()
@@ -83,7 +81,6 @@ class Ui_MainWindow(object):
 
         self.left_menu_treeWidget = QTreeWidget(self.centralwidget)
         self.left_menu_treeWidget.setObjectName(u"left_menu_treeView")
-        #self.left_menu_treeWidget.setGeometry(QRect(10, 1, 111, 591))
         self.left_menu_treeWidget.setMaximumSize(QSize(120, 1000))
         self.left_menu_treeWidget.setBaseSize(QSize(0, 0))
         self.left_menu_treeWidget.setHeaderHidden(True)
@@ -247,12 +244,12 @@ class Ui_MainWindow(object):
         self.settings.setTextAlignment(0, Qt.AlignLeft)
 
         "____________________________________________________"
-        # Switch user position
+        # Switch user position in left menu
 
         self.left_menu_treeWidget.itemClicked.connect(self.left_menu_clicked)
 
         "____________________________________________________"
-        # Dashboard timer
+        # Dashboard timer to update dashboard values
 
         dashboard_timer = QTimer(self, interval=1000, timeout=self.update_dashboard)
         dashboard_timer.start()
@@ -260,7 +257,7 @@ class Ui_MainWindow(object):
         "____________________________________________________"
         # Dialog to add new cameras
 
-        self.add_new_camera_pushButton.clicked.connect(self.add_new_cam_dialog)
+        self.add_new_camera_pushButton.clicked.connect(self.add_new_camera_dialog)
 
         "____________________________________________________"
 
@@ -294,42 +291,68 @@ class Ui_MainWindow(object):
         self.gpu_load_info_label.setText((str(GPUtil.getGPUs()[0].load))) # Update GPU
 
     "____________________________________________________"
-
     #Slot to get information what position in menu was chosen
+
     @Slot(QTreeWidgetItem, int)
     def left_menu_clicked(self, item, col):
         print(item, col, item.text(col))
+        print(Ui_MainWindow.camera_position_in_grid)
+        print(Ui_MainWindow.left_menu_tree_widget_list)
+
         if item.data(col, Qt.UserRole) is not None:
-            Ui_MainWindow.user_current_position = item.data(col, Qt.UserRole) # Store current position
+            Ui_MainWindow.user_current_position_in_tree_widget_list = item.data(col, Qt.UserRole) # Store current position of user in left menu
             print(item.data(col, Qt.UserRole))
             self.main_window_stackedWidget.setCurrentIndex(item.data(col, Qt.UserRole))
 
     "____________________________________________________"
-
     # Slot to add new camera to gridLayout
+    # camera func - video that we are adding to grid layout
+    # x and y positions - positions in grid where we are adding
+
     @Slot(QObject, QWidget, int, int)
-    def add_cameras_page_gridLayout(self, camera_func, x_pos, y_pos):
-        self.cameras_page_gridLayout.addWidget(camera_func, x_pos, y_pos)
+    def add_cameras_page_gridLayout(self, camera_func, x_pos_in_grid, y_pos_in_grid):
+        self.cameras_page_gridLayout.addWidget(camera_func, x_pos_in_grid, y_pos_in_grid)
 
     "____________________________________________________"
-
     # Slot to delete camera in gridLayout
+    # camera func - video that we are deleting from grid layout
+    # rtsp_widget - page gui that we are deleting
+
     @Slot(QWidget, QWidget)
     def delete_cameras_page_gridLayout(self, camera_func, rtsp_widget):
         rtsp_widget.deleteLater()
-        camera_func.deleteLater()
+        try:
+            camera_func.deleteLater()
+        except:
+            pass
 
     "____________________________________________________"
+    # Slot to totally delete page from left menu
+    # qtree_child_index - position in left menu that we are deleting
 
-    # Slot to totally delete page from menu
     @Slot(int)
     def delete_qtree_item(self, qtree_child_index):
-        self.settings.removeChild(Ui_MainWindow.tree_widget_list[qtree_child_index])
-        self.main_window_stackedWidget.setCurrentIndex(qtree_child_index-1)
-        Ui_MainWindow.tree_widget_list[qtree_child_index] = None
+        self.settings.removeChild(Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index]) # deleting
+        self.main_window_stackedWidget.setCurrentIndex(qtree_child_index-1) # changing current user position
+        Ui_MainWindow.user_current_position_in_tree_widget_list = qtree_child_index-1 # Store current position of user in left menu
+        Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index] = None
 
     "____________________________________________________"
+    # Slot to hide or show cameras in gridLayout
+    @Slot(QWidget)
+    def expand_hide_camera(self, camera_func):
+        if self.expanded == False:
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v != camera_func and v is not None:
+                    self.cameras_page_gridLayout.itemAtPosition(k[0], k[1]).widget().hide()
+                    self.expanded = True
+        else:
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v != camera_func and v is not None:
+                    self.cameras_page_gridLayout.itemAtPosition(k[0], k[1]).widget().show()
+                    self.expanded = False
 
+    "____________________________________________________"
     # Function to call a dialog and add new camera
     def add_new_cam_dialog(self):
         Dialog = QDialog()
@@ -339,7 +362,7 @@ class Ui_MainWindow(object):
         Dialog.exec()
         if adding_new_cam.choice_value == 'rtsp':
             self.rtsp = QTreeWidgetItem(self.settings)
-            if self.rtsp_index == 1: # Need to set up logic for it!!!!!!!!!!!!!!!!!!!!!!!
+            if self.rtsp_index == 1: # Прописать логику и починить
                 self.rtsp_name = 'RTSP'
                 self.rtsp.setText(0, self.rtsp_name)
                 self.rtsp_index += 1
@@ -355,10 +378,13 @@ class Ui_MainWindow(object):
                     break
 
             self.rtsp.setData(0, Qt.UserRole, self.actual_index)
+
+            # Creating camera class
             self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp)
             self.rtsp_page.rtsp_update_main_gui_add.connect(self.add_cameras_page_gridLayout)
             self.rtsp_page.rtsp_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)
             self.rtsp_page.rtsp_delete_page.connect(self.delete_qtree_item)
+            self.rtsp_page.rtsp_show_hide.connect(self.expand_hide_camera)
             self.main_window_stackedWidget.addWidget(self.rtsp_page.setupGUi())
 
         elif adding_new_cam.choice_value == 'webcam':
@@ -386,6 +412,7 @@ class Rtsp_page(QObject):
     rtsp_update_main_gui_add = Signal(QWidget, int, int)
     rtsp_update_main_gui_delete = Signal(QWidget, QWidget)
     rtsp_delete_page = Signal(int)
+    rtsp_show_hide = Signal(QWidget)
 
     def __init__(self, rtsp_name, rtsp_left_menu_name):
         super().__init__()
@@ -397,6 +424,7 @@ class Rtsp_page(QObject):
     def setupGUi(self):
         self.rtsp_page = QWidget()
         self.rtsp_page.setObjectName(u"rtsp_page")
+
         self.verticalLayout_3 = QVBoxLayout(self.rtsp_page)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.rtsp_page_verticalLayout = QVBoxLayout()
@@ -493,24 +521,26 @@ class Rtsp_page(QObject):
         self.rtsp_actual_status_label.setText(QCoreApplication.translate("MainWindow", u"Disabled", None))
         self.rtsp_run_lpr_checkBox.setText(QCoreApplication.translate("MainWindow", u"Run LPR", None))
 
+        # Line to change name of the camera in Left menu
         self.rtsp_device_name_lineEdit.setText(self.rtsp_name)
         self.rtsp_device_name_lineEdit.textChanged.connect(lambda: self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text()))
-
+        # Button to enable/disable camera
         self.rtsp_enable_pushButton.clicked.connect(self.enable_disable_rtsp_cam)
+        # Button to delete camera
         self.rtsp_delete_pushButton.clicked.connect(self.delete_rtsp_cam)
-
+        # Checkbox to run LPR analytics
         self.rtsp_run_lpr_checkBox.stateChanged.connect(self.check_lpr_button_status)
-
 
         return self.rtsp_page
 
+    # Run and stop LPR analytics
     def check_lpr_button_status(self):
         if self.rtsp_run_lpr_checkBox.isChecked() == True:
             self.new_camera.run_lpr()
         else:
             self.new_camera.stop_lpr()
 
-
+    # Enable or disable camera
     def enable_disable_rtsp_cam(self):
         if self.status == False:
             self.new_camera = New_rtsp_camera(self.rtsp_stream_url_lineEdit.text())
@@ -525,12 +555,14 @@ class Rtsp_page(QObject):
                         self.rtsp_enable_pushButton.setText("Disable")
                         self.rtsp_actual_status_label.setText("Enabled")
                         self.status = True
+                        #self.new_camera.QScrollArea.installEventFilter(self)
                         break
 
         elif self.status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
+                    #self.new_camera.QScrollArea.removeEventFilter(self)
                     self.rtsp_update_main_gui_delete.emit(self.cam_status)
                     self.rtsp_enable_pushButton.setText("Enable")
                     self.rtsp_actual_status_label.setText("Disabled")
@@ -542,13 +574,22 @@ class Rtsp_page(QObject):
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
+                    self.new_camera.QScrollArea.removeEventFilter(self)
                     self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
             self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
         elif self.status == False:
+            self.new_camera.QScrollArea.removeEventFilter(self)
             self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
             self.rtsp_delete_page.emit(Ui_MainWindow.user_current_position)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonDblClick:
+            if obj:
+                self.rtsp_show_hide.emit(self.new_camera)
+        return super().eventFilter(obj, event)
+
     def __del__(self):
         print("Rtsp cam is deleted")
 
@@ -709,3 +750,5 @@ class Webcam_page(QObject):
 
     def __del__(self):
         print("webcam is deleted")
+
+

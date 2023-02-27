@@ -2,6 +2,8 @@ from PySide6 import QtWidgets
 
 import sys
 
+from PySide6.QtCore import QEvent
+
 import main_window
 
 class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
@@ -9,6 +11,7 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         super().__init__()
         self.actual_index = 0
         self.rtsp_index = 1
+        self.expanded = False
         self.setupUi(self)
 
 def main():
