@@ -1,4 +1,4 @@
-from PySide6.QtCore import Slot, QObject, QThread
+from PySide6.QtCore import Slot, QObject, QThread, Signal
 from PySide6.QtGui import QPalette, QImage, QPixmap
 from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel
 
@@ -10,10 +10,14 @@ import numpy as np
 
 
 class New_rtsp_camera(QObject):
+
+    camer_status = Signal(str)
+
     def __init__(self, camera_url):
         super().__init__()
         self.camera_url = camera_url
         self.use_lpr = False
+        self.active = 'Enabled'
 
     def add_new_camera(self):
         self.camera = QLabel()
@@ -27,6 +31,7 @@ class New_rtsp_camera(QObject):
 
         self.capture_camera = Rtsp_camera(self.camera_url)
         self.capture_camera.ImageUpdated.connect(self.ShowCamera)
+        self.capture_camera.CameraWorking.connect(self.camera_status)
         self.capture_camera.start()
 
         return self.QScrollArea
@@ -39,10 +44,15 @@ class New_rtsp_camera(QObject):
         qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
         self.camera.setPixmap(QPixmap.fromImage(qt_rgb_image))
 
+    @Slot(bool)
+    def camera_status(self, bool):
+        if bool == False:
+            self.camer_status.emit("Error")
+
+
     def stop_camera(self):
         self.capture_camera.stop_running()
         self.capture_camera.terminate()
-
 
     def run_lpr(self):
         self.capture_camera.run_lpr()

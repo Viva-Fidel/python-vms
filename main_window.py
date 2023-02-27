@@ -551,30 +551,32 @@ class Rtsp_page(QObject):
         if self.status == False:
             self.new_camera = New_rtsp_camera(self.rtsp_stream_url_lineEdit.text())
             self.cam_status = self.new_camera.add_new_camera()
-            if self.cam_status == False:
-                self.rtsp_actual_status_label.setText("Error")
-            else:
-                for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                    if v == None:
-                        Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
-                        self.rtsp_update_main_gui_add.emit(self.cam_status, k[0], k[1])
-                        self.rtsp_enable_pushButton.setText("Disable")
-                        self.rtsp_actual_status_label.setText("Enabled")
-                        self.status = True
-                        self.new_camera.QScrollArea.installEventFilter(self)
-                        break
+            self.new_camera.camer_status.connect(self.update_status_label)
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v == None:
+                    Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
+                    self.rtsp_update_main_gui_add.emit(self.cam_status, k[0], k[1])
+                    self.rtsp_enable_pushButton.setText("Disable")
+                    self.rtsp_actual_status_label.setText('Enabled')
+                    self.status = True
+                    self.new_camera.QScrollArea.installEventFilter(self)
+                    break
 
         elif self.status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
                     self.new_camera.QScrollArea.removeEventFilter(self)
-                    self.rtsp_update_main_gui_delete.emit(self.cam_status)
+                    self.rtsp_update_main_gui_delete.emit(self.cam_status, None)
                     self.rtsp_enable_pushButton.setText("Enable")
                     self.rtsp_actual_status_label.setText("Disabled")
                     self.status = False
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
+    @Slot(str)
+    def update_status_label(self, str):
+        self.rtsp_actual_status_label.setText(str)
+
     def delete_rtsp_cam(self):
         if self.status == True:
             self.new_camera.stop_camera()

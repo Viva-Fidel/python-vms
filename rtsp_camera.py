@@ -14,20 +14,23 @@ import asyncio
 class Rtsp_camera(QThread):
 
     ImageUpdated = Signal(np.ndarray)
+    CameraWorking = Signal(bool)
 
     def __init__(self, camera_url):
         super().__init__()
         self.camera_url = camera_url
         self.running = True
         self.lpr_analytics = False
+        self.camera_is_working = False
 
     def run(self):
         cap = cv2.VideoCapture(self.camera_url, cv2.CAP_FFMPEG)
         if self.running == True:
             if cap.isOpened() == True:
-                while (cap.isOpened()):
+                while cap.isOpened():
                     ret, frame = cap.read()
                     if ret:
+                        print(ret)
                         if self.lpr_analytics == True:
                             lpr = Lpr_analytics()
                             asyncio.run(lpr.run_lpr(frame))
@@ -35,6 +38,9 @@ class Rtsp_camera(QThread):
 
                         #qt_rgb_image_scaled = qt_rgb_image.scaled(800, 600, Qt.KeepAspectRatio)
                         self.ImageUpdated.emit(frame)
+            else:
+                if cap.isOpened() == False:
+                    self.CameraWorking.emit(False)
 
         else:
             cap.release()
