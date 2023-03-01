@@ -60,6 +60,8 @@ class Ui_MainWindow(object):
     # Current position of user in menu
     user_current_position_in_tree_widget_list = 0
 
+    engine = create_engine('sqlite:///cam_list.db', echo=True)
+
     def __init__(self):
         super().__init__()
         self.actual_index = 0
@@ -74,7 +76,7 @@ class Ui_MainWindow(object):
         "____________________________________________________"
         # DB initialization
 
-        self.engine = create_engine('sqlite:///cam_list.db', echo=True)
+        #engine = create_engine('sqlite:///cam_list.db', echo=True)
         Base.metadata.create_all(bind=self.engine)
 
         "____________________________________________________"
@@ -531,7 +533,7 @@ class Rtsp_page(QObject):
 
         # Line to change name of the camera in Left menu
         self.rtsp_device_name_lineEdit.setText(self.rtsp_name)
-        self.rtsp_device_name_lineEdit.textChanged.connect(lambda: self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text()))
+        self.rtsp_device_name_lineEdit.textChanged.connect(self.update_device_name)
         # Button to enable/disable camera
         self.rtsp_enable_pushButton.clicked.connect(self.enable_disable_rtsp_cam)
         # Button to delete camera
@@ -540,6 +542,9 @@ class Rtsp_page(QObject):
         self.rtsp_run_lpr_checkBox.stateChanged.connect(self.check_lpr_button_status)
 
         return self.rtsp_page
+
+    def update_device_name(self):
+        self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text())
 
     # Run and stop LPR analytics
     def check_lpr_button_status(self):
@@ -585,13 +590,12 @@ class Rtsp_page(QObject):
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
                     self.new_camera.QScrollArea.removeEventFilter(self)
-                    self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
+                    self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
         elif self.status == False:
-            print('1')
-            self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
+            self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
 
     def eventFilter(self, obj, event):
@@ -601,6 +605,21 @@ class Rtsp_page(QObject):
         return super().eventFilter(obj, event)
 
     def __del__(self):
+        for k, v in Ui_MainWindow.camera_position_in_grid.items():
+            if v == self.new_camera:
+                self.pos_grid = k
+                break
+            else:
+                self.pos_grid = 'No position'
+
+        session = Session(Ui_MainWindow.engine)
+        spongebob = Cam_list(cam_id=0,
+                             cam_name=f'{self.rtsp_device_name_lineEdit.text()}',
+                             cam_link=f'{self.rtsp_stream_url_lineEdit.text()}',
+                             cam_position_in_grid=f'{self.pos_grid}',
+                             )
+        session.add(spongebob)
+        session.commit()
         print("Rtsp cam is deleted")
 
 "____________________________________________________"
@@ -750,15 +769,13 @@ class Webcam_page(QObject):
 
     def delete_webcam(self):
         if self.status == True:
-            try:
-                self.new_camera.stop_camera()
-                for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                    if v == self.new_camera:
-                        self.webcam_update_main_gui_delete.emit(self.cam_status, self.webcam_page)
-                        Ui_MainWindow.camera_position_in_grid[k] = None
-                        self.new_camera.QScrollArea.removeEventFilter(self)
-            except:
-                pass
+            self.new_camera.stop_camera()
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v == self.new_camera:
+                    self.webcam_update_main_gui_delete.emit(self.cam_status, self.webcam_page)
+                    Ui_MainWindow.camera_position_in_grid[k] = None
+                    self.new_camera.QScrollArea.removeEventFilter(self)
+
             self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
         elif self.status == False:
             self.webcam_update_main_gui_delete.emit(None, self.webcam_page)

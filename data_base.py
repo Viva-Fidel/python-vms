@@ -9,7 +9,7 @@ class Cam_list(Base):
     cam_id = Column("cam_id", Integer, primary_key=True)
     cam_name = Column("cam_name", String)
     cam_link = Column("cam_link", String)
-    cam_position_in_grid = Column('cam_position_in_rid', String)
+    cam_position_in_grid = Column('cam_position_in_grid', String)
 
 
     def __init__(self, cam_id, cam_name, cam_link, cam_position_in_grid):
