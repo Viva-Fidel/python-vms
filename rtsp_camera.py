@@ -38,12 +38,15 @@ class Rtsp_camera(QThread):
 
                         #qt_rgb_image_scaled = qt_rgb_image.scaled(800, 600, Qt.KeepAspectRatio)
                         self.ImageUpdated.emit(frame)
-            else:
-                if cap.isOpened() == False:
+                    else:
+                        self.CameraWorking.emit(False)
+                        cap.release()
+                else:
                     self.CameraWorking.emit(False)
-
-        else:
-            cap.release()
+                    cap.release()
+            else:
+                self.CameraWorking.emit(False)
+                cap.release()
 
     def run_lpr(self):
         self.lpr_analytics = True

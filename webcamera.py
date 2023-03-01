@@ -10,6 +10,7 @@ from lpr_analytics import Lpr_analytics
 class Webcamera(QThread):
 
     ImageUpdated = Signal(np.ndarray)
+    CameraWorking = Signal(bool)
 
     def  __init__(self, parent=None):
         QThread.__init__(self, parent)
@@ -30,9 +31,15 @@ class Webcamera(QThread):
                             lpr.run_lpr(frame)
                         #qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)
                         self.ImageUpdated.emit(frame)
-
-        else:
-            cap.release()
+                    else:
+                        self.CameraWorking.emit(False)
+                        cap.release()
+                else:
+                    self.CameraWorking.emit(False)
+                    cap.release()
+            else:
+                self.CameraWorking.emit(False)
+                cap.release()
 
 
     def run_lpr(self):

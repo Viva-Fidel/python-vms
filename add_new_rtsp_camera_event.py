@@ -11,7 +11,7 @@ import numpy as np
 
 class New_rtsp_camera(QObject):
 
-    camer_status = Signal(str)
+    error_message = Signal(str)
 
     def __init__(self, camera_url):
         super().__init__()
@@ -31,7 +31,7 @@ class New_rtsp_camera(QObject):
 
         self.capture_camera = Rtsp_camera(self.camera_url)
         self.capture_camera.ImageUpdated.connect(self.ShowCamera)
-        self.capture_camera.CameraWorking.connect(self.camera_status)
+        self.capture_camera.CameraWorking.connect(self.send_error)
         self.capture_camera.start()
 
         return self.QScrollArea
@@ -45,10 +45,9 @@ class New_rtsp_camera(QObject):
         self.camera.setPixmap(QPixmap.fromImage(qt_rgb_image))
 
     @Slot(bool)
-    def camera_status(self, bool):
+    def send_error(self, bool):
         if bool == False:
-            self.camer_status.emit("Error")
-
+            self.error_message.emit("Error")
 
     def stop_camera(self):
         self.capture_camera.stop_running()

@@ -1,5 +1,5 @@
 import numpy as np
-from PySide6.QtCore import Slot, QObject
+from PySide6.QtCore import Slot, QObject, Signal
 from PySide6.QtGui import QPalette, QImage, QPixmap
 from PySide6.QtWidgets import QSizePolicy, QScrollArea, QLabel
 
@@ -8,6 +8,9 @@ from webcamera import Webcamera
 import cv2
 
 class New_webcamera(QObject):
+
+    error_message = Signal(str)
+
     def __init__(self):
         super().__init__()
 
@@ -21,10 +24,9 @@ class New_webcamera(QObject):
         self.QScrollArea.setWidgetResizable(True)
         self.QScrollArea.setWidget(self.camera)
 
-
-
         self.capture_camera = Webcamera(self)
         self.capture_camera.ImageUpdated.connect(self.ShowCamera)
+        self.capture_camera.CameraWorking.connect(self.send_error)
         self.capture_camera.start()
 
 
@@ -37,6 +39,11 @@ class New_webcamera(QObject):
         cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
         self.camera.setPixmap(QPixmap.fromImage(qt_rgb_image))
+
+    @Slot(bool)
+    def send_error(self, bool):
+        if bool == False:
+            self.error_message.emit("Error")
 
     def stop_camera(self):
         self.capture_camera.stop_running()

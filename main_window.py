@@ -17,10 +17,12 @@ from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
 
 import GPUtil
 import psutil
+from sqlalchemy import create_engine
 
 from add_new_camera_dialog import Ui_Add_new_cam_dialog
 from add_new_rtsp_camera_event import New_rtsp_camera
 from add_new_webcam_event import New_webcamera
+from data_base import Base
 
 import resources
 
@@ -66,6 +68,12 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
+
+        "____________________________________________________"
+        # DB initialization
+
+        engine = create_engine('sqlite:///cam_list.db', echo=True)
+        Base.metadata.create_all(bind=engine)
 
         "____________________________________________________"
         # Central widget
@@ -551,7 +559,7 @@ class Rtsp_page(QObject):
         if self.status == False:
             self.new_camera = New_rtsp_camera(self.rtsp_stream_url_lineEdit.text())
             self.cam_status = self.new_camera.add_new_camera()
-            self.new_camera.camer_status.connect(self.update_status_label)
+            self.new_camera.error_message.connect(self.update_status_label_with_error)
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == None:
                     Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
@@ -574,7 +582,7 @@ class Rtsp_page(QObject):
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
     @Slot(str)
-    def update_status_label(self, str):
+    def update_status_label_with_error(self, str):
         self.rtsp_actual_status_label.setText(str)
 
     def delete_rtsp_cam(self):
@@ -601,7 +609,6 @@ class Rtsp_page(QObject):
         print("Rtsp cam is deleted")
 
 "____________________________________________________"
-
 # Class to add Webcam
 
 class Webcam_page(QObject):
@@ -615,6 +622,7 @@ class Webcam_page(QObject):
         self.webcam_name = webcam_name
         self.webcam_left_menu_name = webcam_left_menu_name
         self.status = False
+
     def setupGUi(self):
         self.webcam_page = QWidget()
         self.webcam_page.setObjectName(u"webcam_page")
@@ -717,31 +725,33 @@ class Webcam_page(QObject):
         if self.status == False:
             self.new_camera = New_webcamera()
             self.cam_status = self.new_camera.add_new_camera()
-            if self.cam_status == False:
-                self.webcam_actual_status_label.setText("Error")
-            else:
-                for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                    if v == None:
-                        Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
-                        self.webcam_update_main_gui.emit(self.cam_status, k[0], k[1])
-                        self.webcam_enable_pushButton.setText("Disable")
-                        self.webcam_actual_status_label.setText("Enabled")
-                        self.status = True
-                        self.new_camera.QScrollArea.installEventFilter(self)
-                        break
+            self.new_camera.error_message.connect(self.update_status_label_with_error)
+            for k, v in Ui_MainWindow.camera_position_in_grid.items():
+                if v == None:
+                    Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
+                    self.webcam_update_main_gui.emit(self.cam_status, k[0], k[1])
+                    self.webcam_enable_pushButton.setText("Disable")
+                    self.webcam_actual_status_label.setText("Enabled")
+                    self.status = True
+                    self.new_camera.QScrollArea.installEventFilter(self)
+                    break
 
         # Disable
         elif self.status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
-                    self.webcam_update_main_gui_delete.emit(self.cam_status)
+                    self.webcam_update_main_gui_delete.emit(self.cam_status, None)
                     self.webcam_enable_pushButton.setText("Enable")
                     self.webcam_actual_status_label.setText("Disabled")
                     self.status = False
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     self.new_camera.QScrollArea.removeEventFilter(self)
                     break
+
+    @Slot(str)
+    def update_status_label_with_error(self, str):
+            self.webcam_actual_status_label.setText(str)
 
     def delete_webcam(self):
         if self.status == True:
