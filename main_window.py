@@ -333,9 +333,12 @@ class Ui_MainWindow(object):
 
     @Slot(QWidget, QWidget)
     def delete_cameras_page_gridLayout(self, camera_func, rtsp_widget):
-        rtsp_widget.deleteLater()
         try:
             camera_func.deleteLater()
+        except:
+            pass
+        try:
+            rtsp_widget.deleteLater()
         except:
             pass
 
@@ -372,6 +375,7 @@ class Ui_MainWindow(object):
 
     "____________________________________________________"
     # Function to call a dialog and add new camera
+
     def add_new_cam_dialog(self):
         Dialog = QDialog()
         adding_new_cam = Ui_Add_new_cam_dialog()
@@ -581,12 +585,13 @@ class Rtsp_page(QObject):
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
                     self.new_camera.QScrollArea.removeEventFilter(self)
-                    self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
+                    self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
         elif self.status == False:
-            self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
+            print('1')
+            self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
 
     def eventFilter(self, obj, event):
