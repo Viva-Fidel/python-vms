@@ -13,16 +13,18 @@ from PySide6.QtCore import (QCoreApplication,
 from PySide6.QtGui import (QIcon)
 from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QLineEdit, QFrame,
-                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox)
+                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox,
+                               QTreeWidgetItemIterator)
 
 import GPUtil
 import psutil
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from add_new_camera_dialog import Ui_Add_new_cam_dialog
 from add_new_rtsp_camera_event import New_rtsp_camera
 from add_new_webcam_event import New_webcamera
-from data_base import Base
+from data_base import Base, Cam_list
 
 import resources
 
@@ -43,17 +45,17 @@ class Ui_MainWindow(object):
     }
 
     # All possible tree widgets
-    left_menu_tree_widget_list = {
-        3: None,
-        4: None,
-        5: None,
-        6: None,
-        7: None,
-        8: None,
-        9: None,
-        10: None,
-        11: None
-    }
+    left_menu_tree_widget_list = []
+    #left_menu_tree_widget_list = {
+    #    0: None,
+    #    1: None,
+    #    2: None,
+    #    3: None,
+    ##    5: None,
+    #    6: None,
+    #    7: None,
+    #    8: None
+    #}
 
     # Current position of user in menu
     user_current_position_in_tree_widget_list = 0
@@ -72,8 +74,8 @@ class Ui_MainWindow(object):
         "____________________________________________________"
         # DB initialization
 
-        engine = create_engine('sqlite:///cam_list.db', echo=True)
-        Base.metadata.create_all(bind=engine)
+        self.engine = create_engine('sqlite:///cam_list.db', echo=True)
+        Base.metadata.create_all(bind=self.engine)
 
         "____________________________________________________"
         # Central widget
@@ -234,6 +236,7 @@ class Ui_MainWindow(object):
         self.dashboard.setIcon(0, dashboard_icon)
         self.dashboard.setData(0, Qt.UserRole, 0)
         self.dashboard.setTextAlignment(0, Qt.AlignLeft)
+        Ui_MainWindow.left_menu_tree_widget_list.append(self.dashboard)
 
         self.cameras = QTreeWidgetItem(self.left_menu_treeWidget)
         self.cameras.setText(0, 'Cameras')
@@ -242,6 +245,7 @@ class Ui_MainWindow(object):
         self.cameras.setIcon(0, cameras_icon)
         self.cameras.setData(0, Qt.UserRole, 1)
         self.cameras.setTextAlignment(0, Qt.AlignLeft)
+        Ui_MainWindow.left_menu_tree_widget_list.append(self.cameras)
 
         self.settings = QTreeWidgetItem(self.left_menu_treeWidget)
         self.settings.setText(0, 'Settings')
@@ -250,6 +254,7 @@ class Ui_MainWindow(object):
         self.settings.setIcon(0, settings_icon)
         self.settings.setData(0, Qt.UserRole, 2)
         self.settings.setTextAlignment(0, Qt.AlignLeft)
+        Ui_MainWindow.left_menu_tree_widget_list.append(self.settings)
 
         "____________________________________________________"
         # Switch user position in left menu
@@ -304,9 +309,9 @@ class Ui_MainWindow(object):
     @Slot(QTreeWidgetItem, int)
     def left_menu_clicked(self, item, col):
         print(item, col, item.text(col))
-        print(Ui_MainWindow.camera_position_in_grid)
-        print(Ui_MainWindow.left_menu_tree_widget_list)
 
+        #print(Ui_MainWindow.camera_position_in_grid)
+        #print(Ui_MainWindow.left_menu_tree_widget_list)
         if item.data(col, Qt.UserRole) is not None:
             Ui_MainWindow.user_current_position_in_tree_widget_list = item.data(col, Qt.UserRole) # Store current position of user in left menu
             print(item.data(col, Qt.UserRole))
@@ -340,14 +345,18 @@ class Ui_MainWindow(object):
 
     @Slot(int)
     def delete_qtree_item(self, qtree_child_index):
+
         self.settings.removeChild(Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index]) # deleting
-        self.main_window_stackedWidget.setCurrentIndex(qtree_child_index-1) # changing current user position
-        Ui_MainWindow.user_current_position_in_tree_widget_list = qtree_child_index-1 # Store current position of user in left menu
-        Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index] = None
+        self.main_window_stackedWidget.setCurrentIndex(2) # changing current user position
+        Ui_MainWindow.user_current_position_in_tree_widget_list = 2 # Store current position of user in left menu
+        del Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index]
+        for i in range(len(Ui_MainWindow.left_menu_tree_widget_list)):
+            Ui_MainWindow.left_menu_tree_widget_list[i].setData(0, Qt.UserRole, i)
 
     "____________________________________________________"
     # Slot to hide or show cameras in gridLayout
     # camera func - video that we want to expand
+
     @Slot(QWidget)
     def expand_hide_camera(self, camera_func):
         if self.expanded == False:
@@ -371,25 +380,11 @@ class Ui_MainWindow(object):
         Dialog.exec()
         if adding_new_cam.choice_value == 'rtsp':
             self.rtsp = QTreeWidgetItem(self.settings)
-            #if self.rtsp_index == 1:
-                #self.rtsp_name = 'RTSP'
-                #self.rtsp.setText(0, self.rtsp_name)
-                #self.rtsp_index += 1
-            #else:
-                #self.rtsp_name = f'RTSP {self.rtsp_index}'
-                #self.rtsp.setText(0, self.rtsp_name)
-                #self.rtsp_index += 1
 
             self.rtsp_name = 'RTSP'
             self.rtsp.setText(0, self.rtsp_name)
-
-            for k, v in Ui_MainWindow.left_menu_tree_widget_list.items():
-                if v == None:
-                    self.actual_index = k
-                    Ui_MainWindow.left_menu_tree_widget_list[k] = self.rtsp
-                    break
-
-            self.rtsp.setData(0, Qt.UserRole, self.actual_index)
+            self.rtsp.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
+            Ui_MainWindow.left_menu_tree_widget_list.append(self.rtsp)
 
             # Creating camera class and connecting it to signals
             self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp)
@@ -401,16 +396,11 @@ class Ui_MainWindow(object):
 
         elif adding_new_cam.choice_value == 'webcam':
             self.webcam = QTreeWidgetItem(self.settings)
+
             self.webcam_name = 'Webcam'
             self.webcam.setText(0, self.webcam_name)
-
-            for k, v in Ui_MainWindow.left_menu_tree_widget_list.items():
-                if v == None:
-                    self.actual_index = k
-                    Ui_MainWindow.left_menu_tree_widget_list[k] = self.webcam
-                    break
-
-            self.webcam.setData(0, Qt.UserRole, self.actual_index)
+            self.webcam.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
+            Ui_MainWindow.left_menu_tree_widget_list.append(self.webcam)
 
             # Creating camera class and connecting it to signals
             self.webcam_page = Webcam_page(self.webcam_name, self.webcam)
