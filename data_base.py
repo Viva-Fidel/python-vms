@@ -6,7 +6,7 @@ Base = orm.declarative_base()
 class Cam_list(Base):
     __tablename__ = "cam_list"
 
-    cam_id = Column("cam_id", Integer, primary_key=True)
+    cam_id = Column("cam_id", String, primary_key=True)
     cam_name = Column("cam_name", String)
     cam_link = Column("cam_link", String)
     cam_position_in_grid = Column('cam_position_in_grid', String)

@@ -30,7 +30,6 @@ class Rtsp_camera(QThread):
                 while cap.isOpened():
                     ret, frame = cap.read()
                     if ret:
-                        print(ret)
                         if self.lpr_analytics == True:
                             lpr = Lpr_analytics()
                             asyncio.run(lpr.run_lpr(frame))
