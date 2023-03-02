@@ -13,8 +13,7 @@ from PySide6.QtCore import (QCoreApplication,
 from PySide6.QtGui import (QIcon)
 from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QLineEdit, QFrame,
-                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox,
-                               QTreeWidgetItemIterator)
+                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox)
 
 import GPUtil
 import psutil
@@ -46,30 +45,17 @@ class Ui_MainWindow(object):
         (2, 2): None
     }
 
-    # All possible tree widgets
+    # All possible tree widgets and pages
     left_menu_tree_widget_list = []
-    #left_menu_tree_widget_list = {
-    #    0: None,
-    #    1: None,
-    #    2: None,
-    #    3: None,
-    ##    5: None,
-    #    6: None,
-    #    7: None,
-    #    8: None
-    #}
-    gui_widget_list = []
 
     # Current position of user in menu
     user_current_position_in_tree_widget_list = 0
 
+    # Create engine for database
     engine = create_engine('sqlite:///cam_list.db', echo=True)
 
     def __init__(self):
         super().__init__()
-        self.actual_index = 0
-        self.rtsp_index = 1
-
 
     # Setting up UI
     def setupUi(self, MainWindow):
@@ -79,7 +65,6 @@ class Ui_MainWindow(object):
         "____________________________________________________"
         # DB initialization
 
-        #engine = create_engine('sqlite:///cam_list.db', echo=True)
         Base.metadata.create_all(bind=self.engine)
 
         "____________________________________________________"
@@ -315,12 +300,9 @@ class Ui_MainWindow(object):
     def left_menu_clicked(self, item, col):
         print(item, col, item.text(col))
 
-        #print(Ui_MainWindow.camera_position_in_grid)
-        #print(Ui_MainWindow.left_menu_tree_widget_list)
         if item.data(col, Qt.UserRole) is not None:
             Ui_MainWindow.user_current_position_in_tree_widget_list = item.data(col, Qt.UserRole) # Store current position of user in left menu
-            print(item.data(col, Qt.UserRole))
-            self.main_window_stackedWidget.setCurrentIndex(item.data(col, Qt.UserRole))
+            self.main_window_stackedWidget.setCurrentIndex(item.data(col, Qt.UserRole)) # Switch user position
 
     "____________________________________________________"
     # Slot to add new camera to gridLayout
@@ -353,13 +335,12 @@ class Ui_MainWindow(object):
 
     @Slot(int)
     def delete_qtree_item(self, qtree_child_index):
-
-        self.settings.removeChild(Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index][0]) # deleting
+        self.settings.removeChild(Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index][0]) # deleting from left menu
         self.main_window_stackedWidget.setCurrentIndex(2) # changing current user position
         Ui_MainWindow.user_current_position_in_tree_widget_list = 2 # Store current position of user in left menu
-        del Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index]
+        del Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index] # deleting class from program
         for i in range(len(Ui_MainWindow.left_menu_tree_widget_list)):
-            Ui_MainWindow.left_menu_tree_widget_list[i][0].setData(0, Qt.UserRole, i)
+            Ui_MainWindow.left_menu_tree_widget_list[i][0].setData(0, Qt.UserRole, i) # update positions in left menu
 
     "____________________________________________________"
     # Slot to hide or show cameras in gridLayout
@@ -393,7 +374,6 @@ class Ui_MainWindow(object):
             self.rtsp_name = 'RTSP'
             self.rtsp.setText(0, self.rtsp_name)
             self.rtsp.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
-            #Ui_MainWindow.left_menu_tree_widget_list.append(self.rtsp)
 
             # Creating camera class and connecting it to signals
             self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp)
@@ -434,11 +414,13 @@ class Rtsp_page(QObject):
 
         self.rtsp_name = rtsp_name
         self.rtsp_left_menu_name = rtsp_left_menu_name
-        self.status = False
-        self.unique_id = None
+
+        self.analytics_status = False
+        self.camera_status = False
+        self.current_position_in_grid = 'No position'
+        self.unique_id = str(uuid.uuid4())[:8]
 
     def setupGUi(self):
-        self.unique_id = str(uuid.uuid4())[:8]
         self.rtsp_page = QWidget()
         self.rtsp_page.setObjectName(u"rtsp_page")
 
@@ -549,6 +531,7 @@ class Rtsp_page(QObject):
 
         return self.rtsp_page
 
+    # Update name in left menu
     def update_device_name(self):
         self.rtsp_left_menu_name.setText(0, self.rtsp_device_name_lineEdit.text())
 
@@ -556,35 +539,38 @@ class Rtsp_page(QObject):
     def check_lpr_button_status(self):
         if self.rtsp_run_lpr_checkBox.isChecked() == True:
             self.new_camera.run_lpr()
+            self.analytics_status = True
         else:
             self.new_camera.stop_lpr()
+            self.analytics_status = False
 
     # Enable or disable camera
-
     def enable_disable_rtsp_cam(self):
-        if self.status == False:
+        if self.camera_status == False:
             self.new_camera = New_rtsp_camera(self.rtsp_stream_url_lineEdit.text())
-            self.cam_status = self.new_camera.add_new_camera()
+            self.camera = self.new_camera.add_new_camera()
             self.new_camera.error_message.connect(self.update_status_label_with_error)
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == None:
                     Ui_MainWindow.camera_position_in_grid[k] = self.new_camera
-                    self.rtsp_update_main_gui_add.emit(self.cam_status, k[0], k[1])
+                    self.rtsp_update_main_gui_add.emit(self.camera, k[0], k[1])
+                    self.current_position_in_grid = f'({k[0]}, {k[1]})'
                     self.rtsp_enable_pushButton.setText("Disable")
                     self.rtsp_actual_status_label.setText('Enabled')
-                    self.status = True
+                    self.camera_status = True
                     self.new_camera.QScrollArea.installEventFilter(self)
                     break
 
-        elif self.status == True:
+        elif self.camera_status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
                     self.new_camera.QScrollArea.removeEventFilter(self)
-                    self.rtsp_update_main_gui_delete.emit(self.cam_status, None)
+                    self.rtsp_update_main_gui_delete.emit(self.camera, None)
+                    self.current_position_in_grid = 'No position'
                     self.rtsp_enable_pushButton.setText("Enable")
                     self.rtsp_actual_status_label.setText("Disabled")
-                    self.status = False
+                    self.camera_statuss = False
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
     @Slot(str)
@@ -592,16 +578,16 @@ class Rtsp_page(QObject):
         self.rtsp_actual_status_label.setText(str)
 
     def delete_rtsp_cam(self):
-        if self.status == True:
+        if self.camera_status == True:
             self.new_camera.stop_camera()
             for k, v in Ui_MainWindow.camera_position_in_grid.items():
                 if v == self.new_camera:
                     self.new_camera.QScrollArea.removeEventFilter(self)
-                    self.rtsp_update_main_gui_delete.emit(self.cam_status, self.rtsp_page)
+                    self.rtsp_update_main_gui_delete.emit(self.camera, self.rtsp_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
-        elif self.status == False:
+        elif self.camera_status == False:
             self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
 
@@ -612,22 +598,6 @@ class Rtsp_page(QObject):
         return super().eventFilter(obj, event)
 
     def __del__(self):
-        try:
-            for k, v in Ui_MainWindow.camera_position_in_grid.items():
-                if v == self.new_camera:
-                    self.pos_grid = k
-                    break
-        except:
-            self.pos_grid = 'No position'
-
-        session = Session(Ui_MainWindow.engine)
-        camera = Cam_list(cam_id=f'{self.unique_id}',
-                             cam_name=f'{self.rtsp_device_name_lineEdit.text()}',
-                             cam_link=f'{self.rtsp_stream_url_lineEdit.text()}',
-                             cam_position_in_grid=f'{self.pos_grid}',
-                             )
-        session.add(camera)
-        session.commit()
         print("Rtsp cam is deleted")
 
 "____________________________________________________"
