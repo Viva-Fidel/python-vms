@@ -7,6 +7,7 @@ class Cam_list(Base):
     __tablename__ = "cam_list"
 
     cam_id = Column("cam_id", String, primary_key=True)
+    cam_type = Column("cam_type", String)
     cam_name = Column("cam_name", String)
     cam_link = Column("cam_link", String)
     cam_position_in_grid = Column('cam_position_in_grid', String)
@@ -14,8 +15,9 @@ class Cam_list(Base):
     analytics_status = Column('analytics_status', Boolean)
 
 
-    def __init__(self, cam_id, cam_name, cam_link, cam_position_in_grid, cam_status, analytics_status):
+    def __init__(self, cam_id, cam_type, cam_name, cam_link, cam_position_in_grid, cam_status, analytics_status):
         self.cam_id = cam_id
+        self.cam_type = cam_type
         self.cam_name = cam_name
         self.cam_link = cam_link
         self.cam_position_in_grid = cam_position_in_grid
