@@ -323,6 +323,42 @@ class Ui_MainWindow(object):
                         self.rtsp_page.rtsp_run_lpr_checkBox.setChecked(True)
                         self.rtsp_page.new_camera.run_lpr()
 
+            if cameras.cam_type == 'webcam':
+                self.webcam = QTreeWidgetItem(self.settings)
+
+                self.webcam_name = cameras.cam_name
+                self.webcam.setText(0, self.webcam_name)
+                self.webcam.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
+
+                # Creating camera class and connecting it to signals
+                self.webcam_page = Webcam_page(self.webcam_name, self.webcam, analytics_status=cameras.analytics_status,
+                                           camera_status=cameras.cam_status,
+                                           current_position_in_grid=cameras.cam_position_in_grid,
+                                           unique_id=cameras.cam_id)
+                self.webcam_page.webcam_update_main_gui_add.connect(self.add_cameras_page_gridLayout)  # add camera to grid
+                self.webcam_page.webcam_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)  # delete camera from grid
+                self.webcam_page.webcam_left_menu_delete_page.connect(self.delete_qtree_item)  # delete from left menu
+                self.webcam_page.webcam_show_hide_camera_action.connect(self.expand_hide_camera)  # expand or hide camera
+                self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
+                Ui_MainWindow.left_menu_tree_widget_list.append((self.webcam, self.webcam_page))
+
+                if cameras.cam_status == True:
+
+                    self.webcam_page.new_camera = New_webcamera()
+                    self.webcam_page.camera = self.webcam_page.new_camera.add_new_camera()
+                    self.webcam_page.new_camera.error_message.connect(self.webcam_page.update_status_label_with_error)
+                    Ui_MainWindow.camera_position_in_grid[(int(cameras.cam_position_in_grid[1]), int(cameras.cam_position_in_grid[4]))] = self.webcam_page.new_camera
+                    self.webcam_page.webcam_update_main_gui_add.emit(self.webcam_page.camera,
+                                                                 int(cameras.cam_position_in_grid[1]),
+                                                                 int(cameras.cam_position_in_grid[4]))
+                    self.webcam_page.webcam_enable_pushButton.setText("Disable")
+                    self.webcam_page.webcam_actual_status_label.setText('Enabled')
+                    self.webcam_page.new_camera.QScrollArea.installEventFilter(self)
+
+                    if cameras.analytics_status == True:
+                        self.webcam_page.webcam_run_lpr_checkBox.setChecked(True)
+                        self.webcam_page.new_camera.run_lpr()
+
 
     "____________________________________________________"
     # Function to update dashboard page
@@ -649,16 +685,16 @@ class Webcam_page(QObject):
     webcam_left_menu_delete_page = Signal(int)
     webcam_show_hide_camera_action = Signal(QWidget)
 
-    def __init__(self, webcam_name, webcam_left_menu_name):
+    def __init__(self, webcam_name, webcam_left_menu_name, analytics_status=False, camera_status=False, current_position_in_grid='No position', unique_id=str(uuid.uuid4())[:8]):
         super().__init__()
         self.webcam_name = webcam_name
         self.webcam_left_menu_name = webcam_left_menu_name
 
-        self.analytics_status = False
-        self.camera_status = False
+        self.analytics_status = analytics_status
+        self.camera_status = camera_status
         self.camera_type = 'webcam'
-        self.current_position_in_grid = 'No position'
-        self.unique_id = str(uuid.uuid4())[:8]
+        self.current_position_in_grid = current_position_in_grid
+        self.unique_id = unique_id
 
     def setupGUi(self):
         self.webcam_page = QWidget()

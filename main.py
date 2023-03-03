@@ -38,14 +38,14 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
             elif i[1] != None and i[1].camera_type == 'webcam':
                 cameras = session.query(Cam_list).filter_by(cam_id=i[1].unique_id).first()
                 if cameras:
-                    cameras.cam_name = i[1].rtsp_device_name_lineEdit.text()
+                    cameras.cam_name = i[1].webcam_device_name_lineEdit.text()
                     cameras.cam_position_in_grid = i[1].current_position_in_grid
                     cameras.cam_status = i[1].camera_status
                     cameras.analytics_status = i[1].analytics_status
                 else:
                     cameras = Cam_list(cam_id=i[1].unique_id,
                                        cam_type=i[1].camera_type,
-                                       cam_name=i[1].rtsp_device_name_lineEdit.text(),
+                                       cam_name=i[1].webcam_device_name_lineEdit.text(),
                                        cam_link='0',
                                        cam_position_in_grid=i[1].current_position_in_grid,
                                        cam_status=i[1].camera_status,
