@@ -266,6 +266,8 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.main_window_stackedWidget)
 
+        self.load_from_db()
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
@@ -284,6 +286,43 @@ class Ui_MainWindow(object):
         self.system_parameters_label.setText(QCoreApplication.translate("MainWindow", u"System parameters:", None))
         self.add_new_camera_pushButton.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
     # retranslateUi
+    "____________________________________________________"
+    # Function to load cameras from db
+    def load_from_db(self):
+        session = Session(Ui_MainWindow.engine)
+        for cameras in session.query(Cam_list).all():
+            if cameras.cam_type == 'rtsp':
+                self.rtsp = QTreeWidgetItem(self.settings)
+
+                self.rtsp_name = cameras.cam_name
+                self.rtsp.setText(0, self.rtsp_name)
+                self.rtsp.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
+
+                # Creating camera class and connecting it to signals
+                self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp, analytics_status=cameras.analytics_status, camera_status=cameras.cam_status, current_position_in_grid=cameras.cam_position_in_grid, unique_id=cameras.cam_id)
+                self.rtsp_page.rtsp_update_main_gui_add.connect(self.add_cameras_page_gridLayout)  # add camera to grid
+                self.rtsp_page.rtsp_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)  # delete camera from grid
+                self.rtsp_page.rtsp_left_menu_delete_page.connect(self.delete_qtree_item)  # delete from left menu
+                self.rtsp_page.rtsp_show_hide_camera_action.connect(self.expand_hide_camera)  # expand or hide camera
+                self.main_window_stackedWidget.addWidget(self.rtsp_page.setupGUi())
+                self.rtsp_page.rtsp_stream_url_lineEdit.setText(cameras.cam_link)
+                Ui_MainWindow.left_menu_tree_widget_list.append((self.rtsp, self.rtsp_page))
+
+                if cameras.cam_status == True:
+
+                    self.rtsp_page.new_camera = New_rtsp_camera(cameras.cam_link)
+                    self.rtsp_page.camera = self.rtsp_page.new_camera.add_new_camera()
+                    self.rtsp_page.new_camera.error_message.connect(self.rtsp_page.update_status_label_with_error)
+                    Ui_MainWindow.camera_position_in_grid[(int(cameras.cam_position_in_grid[1]), int(cameras.cam_position_in_grid[4]))] = self.rtsp_page.new_camera
+                    self.rtsp_page.rtsp_update_main_gui_add.emit(self.rtsp_page.camera, int(cameras.cam_position_in_grid[1]), int(cameras.cam_position_in_grid[4]))
+                    self.rtsp_page.rtsp_enable_pushButton.setText("Disable")
+                    self.rtsp_page.rtsp_actual_status_label.setText('Enabled')
+                    self.rtsp_page.new_camera.QScrollArea.installEventFilter(self)
+
+                    if cameras.analytics_status == True:
+                        self.rtsp_page.rtsp_run_lpr_checkBox.setChecked(True)
+                        self.rtsp_page.new_camera.run_lpr()
+
 
     "____________________________________________________"
     # Function to update dashboard page
@@ -409,17 +448,17 @@ class Rtsp_page(QObject):
     rtsp_left_menu_delete_page = Signal(int)
     rtsp_show_hide_camera_action = Signal(QWidget)
 
-    def __init__(self, rtsp_name, rtsp_left_menu_name):
+    def __init__(self, rtsp_name, rtsp_left_menu_name, analytics_status=False, camera_status=False, current_position_in_grid='No position', unique_id=str(uuid.uuid4())[:8]):
         super().__init__()
 
         self.rtsp_name = rtsp_name
         self.rtsp_left_menu_name = rtsp_left_menu_name
 
-        self.analytics_status = False
-        self.camera_status = False
+        self.analytics_status = analytics_status
+        self.camera_status = camera_status
         self.camera_type = 'rtsp'
-        self.current_position_in_grid = 'No position'
-        self.unique_id = str(uuid.uuid4())[:8]
+        self.current_position_in_grid = current_position_in_grid
+        self.unique_id = unique_id
 
     def setupGUi(self):
         self.rtsp_page = QWidget()
@@ -571,7 +610,7 @@ class Rtsp_page(QObject):
                     self.current_position_in_grid = 'No position'
                     self.rtsp_enable_pushButton.setText("Enable")
                     self.rtsp_actual_status_label.setText("Disabled")
-                    self.camera_statuss = False
+                    self.camera_status = False
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
     @Slot(str)
