@@ -18,24 +18,37 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         session = Session(main_window.Ui_MainWindow.engine)
         for i in main_window.Ui_MainWindow.left_menu_tree_widget_list:
             if i[1] != None and i[1].camera_type == 'rtsp':
-                cameras = Cam_list(cam_id=f'{i[1].unique_id}',
-                                  cam_type=f'{i[1].camera_type}',
-                                  cam_name=f'{i[1].rtsp_device_name_lineEdit.text()}',
-                                  cam_link=f'{i[1].rtsp_stream_url_lineEdit.text()}',
-                                  cam_position_in_grid=f'{i[1].current_position_in_grid}',
-                                  cam_status=i[1].camera_status,
-                                  analytics_status=i[1].analytics_status,
-                                  )
-                session.add(cameras)
+                cameras = session.query(Cam_list).filter_by(cam_id=i[1].unique_id).first()
+                if cameras:
+                    cameras.cam_link = i[1].rtsp_stream_url_lineEdit.text()
+                    cameras.cam_position_in_grid = i[1].current_position_in_grid
+                    cameras.cam_status = i[1].camera_status
+                    cameras.analytics_status = i[1].analytics_status
+                else:
+                    cameras = Cam_list(cam_id=i[1].unique_id,
+                                       cam_type=f'{i[1].camera_type}',
+                                       cam_name=i[1].rtsp_device_name_lineEdit.text(),
+                                       cam_link=i[1].rtsp_stream_url_lineEdit.text(),
+                                       cam_position_in_grid=i[1].current_position_in_grid,
+                                       cam_status=i[1].camera_status,
+                                       analytics_status=i[1].analytics_status,
+                                       )
+                    session.add(cameras)
             elif i[1] != None and i[1].camera_type == 'webcam':
-                cameras = Cam_list(cam_id=f'{i[1].unique_id}',
-                                  cam_type=f'{i[1].camera_type}',
-                                  cam_name=f'{i[1].webcam_device_name_lineEdit.text()}',
-                                  cam_link='0',
-                                  cam_position_in_grid=f'{i[1].current_position_in_grid}',
-                                  cam_status=i[1].camera_status,
-                                  analytics_status=i[1].analytics_status,
-                                  )
+                cameras = session.query(Cam_list).filter_by(cam_id=i[1].unique_id).first()
+                if cameras:
+                    cameras.cam_position_in_grid = i[1].current_position_in_grid
+                    cameras.cam_status = i[1].camera_status
+                    cameras.analytics_status = i[1].analytics_status
+                else:
+                    cameras = Cam_list(cam_id=i[1].unique_id,
+                                       cam_type=i[1].camera_type,
+                                       cam_name=i[1].webcam_device_name_lineEdit.text(),
+                                       cam_link='0',
+                                       cam_position_in_grid=i[1].current_position_in_grid,
+                                       cam_status=i[1].camera_status,
+                                       analytics_status=i[1].analytics_status,
+                                       )
 
                 session.add(cameras)
         session.commit()
