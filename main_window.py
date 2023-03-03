@@ -408,14 +408,18 @@ class Ui_MainWindow(object):
     # Slot to totally delete page from left menu
     # qtree_child_index - position in left menu that we are deleting
 
-    @Slot(int)
-    def delete_qtree_item(self, qtree_child_index):
+    @Slot(int, str)
+    def delete_qtree_item(self, qtree_child_index, unique_id):
         self.settings.removeChild(Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index][0]) # deleting from left menu
         self.main_window_stackedWidget.setCurrentIndex(2) # changing current user position
         Ui_MainWindow.user_current_position_in_tree_widget_list = 2 # Store current position of user in left menu
         del Ui_MainWindow.left_menu_tree_widget_list[qtree_child_index] # deleting class from program
         for i in range(len(Ui_MainWindow.left_menu_tree_widget_list)):
             Ui_MainWindow.left_menu_tree_widget_list[i][0].setData(0, Qt.UserRole, i) # update positions in left menu
+
+        session = Session(Ui_MainWindow.engine)
+        session.query(Cam_list).filter_by(cam_id=unique_id).delete()
+        session.commit()
 
     "____________________________________________________"
     # Slot to hide or show cameras in gridLayout
@@ -481,7 +485,7 @@ class Ui_MainWindow(object):
 class Rtsp_page(QObject):
     rtsp_update_main_gui_add = Signal(QWidget, int, int)
     rtsp_update_main_gui_delete = Signal(QWidget, QWidget)
-    rtsp_left_menu_delete_page = Signal(int)
+    rtsp_left_menu_delete_page = Signal(int, str)
     rtsp_show_hide_camera_action = Signal(QWidget)
 
     def __init__(self, rtsp_name, rtsp_left_menu_name, analytics_status=False, camera_status=False, current_position_in_grid='No position', unique_id=str(uuid.uuid4())[:8]):
@@ -662,10 +666,10 @@ class Rtsp_page(QObject):
                     self.rtsp_update_main_gui_delete.emit(self.camera, self.rtsp_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
-            self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
+            self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
         elif self.camera_status == False:
             self.rtsp_update_main_gui_delete.emit(None, self.rtsp_page)
-            self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
+            self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonDblClick:
@@ -682,7 +686,7 @@ class Rtsp_page(QObject):
 class Webcam_page(QObject):
     webcam_update_main_gui_add = Signal(QWidget, int, int)
     webcam_update_main_gui_delete = Signal(QWidget, QWidget)
-    webcam_left_menu_delete_page = Signal(int)
+    webcam_left_menu_delete_page = Signal(int, str)
     webcam_show_hide_camera_action = Signal(QWidget)
 
     def __init__(self, webcam_name, webcam_left_menu_name, analytics_status=False, camera_status=False, current_position_in_grid='No position', unique_id=str(uuid.uuid4())[:8]):
@@ -839,10 +843,10 @@ class Webcam_page(QObject):
                     self.webcam_update_main_gui_delete.emit(self.camera, self.webcam_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
 
-            self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
+            self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
         elif self.camera_status == False:
             self.webcam_update_main_gui_delete.emit(None, self.webcam_page)
-            self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list)
+            self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonDblClick:
