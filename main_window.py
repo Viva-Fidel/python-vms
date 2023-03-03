@@ -13,7 +13,7 @@ from PySide6.QtCore import (QCoreApplication,
 from PySide6.QtGui import (QIcon)
 from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QLineEdit, QFrame,
-                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox)
+                               QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox, QMessageBox)
 
 import GPUtil
 import psutil
@@ -53,6 +53,9 @@ class Ui_MainWindow(object):
 
     # Create engine for database
     engine = create_engine('sqlite:///cam_list.db', echo=True)
+
+    # Limit amount of webcams to 1 max
+    limit_webcam = 0
 
     def __init__(self):
         super().__init__()
@@ -341,6 +344,7 @@ class Ui_MainWindow(object):
                 self.webcam_page.webcam_show_hide_camera_action.connect(self.expand_hide_camera)  # expand or hide camera
                 self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
                 Ui_MainWindow.left_menu_tree_widget_list.append((self.webcam, self.webcam_page))
+                Ui_MainWindow.limit_webcam += 1
 
                 if cameras.cam_status == True:
 
@@ -464,20 +468,30 @@ class Ui_MainWindow(object):
             Ui_MainWindow.left_menu_tree_widget_list.append((self.rtsp, self.rtsp_page))
 
         elif adding_new_cam.choice_value == 'webcam':
-            self.webcam = QTreeWidgetItem(self.settings)
+            if Ui_MainWindow.limit_webcam == 0:
+                self.webcam = QTreeWidgetItem(self.settings)
 
-            self.webcam_name = 'Webcam'
-            self.webcam.setText(0, self.webcam_name)
-            self.webcam.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
+                self.webcam_name = 'Webcam'
+                self.webcam.setText(0, self.webcam_name)
+                self.webcam.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
 
-            # Creating camera class and connecting it to signals
-            self.webcam_page = Webcam_page(self.webcam_name, self.webcam)
-            self.webcam_page.webcam_update_main_gui_add.connect(self.add_cameras_page_gridLayout) # add camera to grid
-            self.webcam_page.webcam_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout) # delete camera from grid
-            self.webcam_page.webcam_left_menu_delete_page.connect(self.delete_qtree_item) # delete from left menu
-            self.webcam_page.webcam_show_hide_camera_action.connect(self.expand_hide_camera) # expand or hide camera
-            self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
-            Ui_MainWindow.left_menu_tree_widget_list.append((self.webcam, self.webcam_page))
+                # Creating camera class and connecting it to signals
+                self.webcam_page = Webcam_page(self.webcam_name, self.webcam)
+                self.webcam_page.webcam_update_main_gui_add.connect(self.add_cameras_page_gridLayout) # add camera to grid
+                self.webcam_page.webcam_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout) # delete camera from grid
+                self.webcam_page.webcam_left_menu_delete_page.connect(self.delete_qtree_item) # delete from left menu
+                self.webcam_page.webcam_show_hide_camera_action.connect(self.expand_hide_camera) # expand or hide camera
+                self.main_window_stackedWidget.addWidget(self.webcam_page.setupGUi())
+                Ui_MainWindow.left_menu_tree_widget_list.append((self.webcam, self.webcam_page))
+                Ui_MainWindow.limit_webcam += 1
+            else:
+                max_webcam_msg_box = QMessageBox()
+                max_webcam_msg_box.setIcon(QMessageBox.Warning)
+                max_webcam_msg_box.setText("You can add only one webcam")
+                max_webcam_msg_box.setWindowTitle("Webcam Error")
+                max_webcam_msg_box.setStandardButtons(QMessageBox.Ok)
+                max_webcam_msg_box.exec()
+
 
 "____________________________________________________"
 
@@ -844,9 +858,11 @@ class Webcam_page(QObject):
                     Ui_MainWindow.camera_position_in_grid[k] = None
 
             self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
+            Ui_MainWindow.limit_webcam -= 1
         elif self.camera_status == False:
             self.webcam_update_main_gui_delete.emit(None, self.webcam_page)
             self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
+            Ui_MainWindow.limit_webcam -= 1
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonDblClick:
