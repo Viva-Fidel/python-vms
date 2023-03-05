@@ -9,8 +9,8 @@
 
 from PySide6.QtCore import (QCoreApplication,
                             QMetaObject, QObject, QRect,
-                            QSize, QTimer, Qt, Slot, Signal, QEvent)
-from PySide6.QtGui import (QIcon)
+                            QSize, QTimer, Qt, Slot, Signal, QEvent, QMimeData)
+from PySide6.QtGui import (QIcon, QDrag)
 from PySide6.QtWidgets import (QPushButton, QSizePolicy, QStackedWidget,
                                QVBoxLayout, QWidget, QDialog, QGridLayout, QLabel, QLineEdit, QFrame,
                                QTreeWidget, QTreeWidgetItem, QHBoxLayout, QSpacerItem, QCheckBox, QMessageBox)
@@ -191,7 +191,6 @@ class Ui_MainWindow(object):
         self.cameras_page_gridLayout.setObjectName(u"cameras_page_gridLayout")
 
         self.gridLayout.addLayout(self.cameras_page_gridLayout, 0, 0, 1, 1)
-
         self.main_window_stackedWidget.addWidget(self.cameras_page)
 
         "____________________________________________________"
@@ -276,7 +275,6 @@ class Ui_MainWindow(object):
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
 
-
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Camera obscura VMS", None))
         self.software_version_label.setText(QCoreApplication.translate("MainWindow", u"Software version: 0.01a", None))
@@ -289,6 +287,9 @@ class Ui_MainWindow(object):
         self.system_parameters_label.setText(QCoreApplication.translate("MainWindow", u"System parameters:", None))
         self.add_new_camera_pushButton.setText(QCoreApplication.translate("MainWindow", u"Add camera", None))
     # retranslateUi
+
+
+
     "____________________________________________________"
     # Function to load cameras from db
     def load_from_db(self):
@@ -302,7 +303,7 @@ class Ui_MainWindow(object):
                 self.rtsp.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
 
                 # Creating camera class and connecting it to signals
-                self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp, analytics_status=cameras.analytics_status, camera_status=cameras.cam_status, current_position_in_grid=cameras.cam_position_in_grid, unique_id=cameras.cam_id)
+                self.rtsp_page = Rtsp_page(self.rtsp_name, self.rtsp, analytics_status=cameras.analytics_status, camera_status=cameras.cam_status, current_position_in_grid=cameras.cam_position_in_grid, unique_id=cameras.cam_id, from_db=True)
                 self.rtsp_page.rtsp_update_main_gui_add.connect(self.add_cameras_page_gridLayout)  # add camera to grid
                 self.rtsp_page.rtsp_update_main_gui_delete.connect(self.delete_cameras_page_gridLayout)  # delete camera from grid
                 self.rtsp_page.rtsp_left_menu_delete_page.connect(self.delete_qtree_item)  # delete from left menu
@@ -321,6 +322,7 @@ class Ui_MainWindow(object):
                     self.rtsp_page.rtsp_enable_pushButton.setText("Disable")
                     self.rtsp_page.rtsp_actual_status_label.setText('Enabled')
                     self.rtsp_page.new_camera.QScrollArea.installEventFilter(self)
+                    #self.rtsp_page.new_camera.QScrollArea.setAcceptDrops(True)
 
                     if cameras.analytics_status == True:
                         self.rtsp_page.rtsp_run_lpr_checkBox.setChecked(True)
@@ -379,6 +381,8 @@ class Ui_MainWindow(object):
     def left_menu_clicked(self, item, col):
         print(item, col, item.text(col))
 
+        #print(Ui_MainWindow.camera_position_in_grid)
+        #print(Ui_MainWindow.left_menu_tree_widget_list)
         if item.data(col, Qt.UserRole) is not None:
             Ui_MainWindow.user_current_position_in_tree_widget_list = item.data(col, Qt.UserRole) # Store current position of user in left menu
             self.main_window_stackedWidget.setCurrentIndex(item.data(col, Qt.UserRole)) # Switch user position
@@ -502,7 +506,7 @@ class Rtsp_page(QObject):
     rtsp_left_menu_delete_page = Signal(int, str)
     rtsp_show_hide_camera_action = Signal(QWidget)
 
-    def __init__(self, rtsp_name, rtsp_left_menu_name, analytics_status=False, camera_status=False, current_position_in_grid='No position', unique_id=str(uuid.uuid4())[:8]):
+    def __init__(self, rtsp_name, rtsp_left_menu_name, analytics_status=False, camera_status=False, current_position_in_grid='No position', unique_id=None, from_db = False):
         super().__init__()
 
         self.rtsp_name = rtsp_name
@@ -513,8 +517,15 @@ class Rtsp_page(QObject):
         self.camera_type = 'rtsp'
         self.current_position_in_grid = current_position_in_grid
         self.unique_id = unique_id
+        self.from_db = from_db
+
+        self.target = None
 
     def setupGUi(self):
+
+        if self.from_db == False:
+            self.unique_id = str(uuid.uuid4())[:8]
+
         self.rtsp_page = QWidget()
         self.rtsp_page.setObjectName(u"rtsp_page")
 
@@ -653,6 +664,7 @@ class Rtsp_page(QObject):
                     self.rtsp_actual_status_label.setText('Enabled')
                     self.camera_status = True
                     self.new_camera.QScrollArea.installEventFilter(self)
+                    #self.new_camera.QScrollArea.setAcceptDrops(True)
                     break
 
         elif self.camera_status == True:
@@ -686,10 +698,22 @@ class Rtsp_page(QObject):
             self.rtsp_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.MouseButtonDblClick:
-            if obj:
-                self.rtsp_show_hide_camera_action.emit(self.new_camera)
+        if event.type() == QEvent.MouseButtonPress:
+            self.mousePressEvent(event)
+        elif event.type() == QEvent.MouseButtonDblClick:
+            self.rtsp_show_hide_camera_action.emit(self.new_camera)
         return super().eventFilter(obj, event)
+
+    def mousePressEvent(self, event):
+        if event.buttons() & Qt.LeftButton:
+            drag = QDrag(self.new_camera)
+            pix = self.new_camera.QScrollArea.widget().grab()
+            mimedata = QMimeData()
+            mimedata.setImageData(pix)
+            drag.setMimeData(mimedata)
+            drag.setPixmap(pix)
+            drag.setHotSpot(event.pos())
+            drag.exec()
 
     def __del__(self):
         print("Rtsp cam is deleted")
