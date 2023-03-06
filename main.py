@@ -24,10 +24,8 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
 
         for key, value in main_window.Ui_MainWindow.camera_position_in_grid.items():
             if value == source_widget:
-                source_widget_position_in_grid = key # (0, 1)
-                print(f'key {key}')
+                source_widget_position_in_grid = key
                 for k, v in main_window.Ui_MainWindow.camera_position_in_grid.items():
-                    print(f'Key {k}')
                     if v != None and v.QScrollArea.geometry().contains(pos) == True :
                         print(main_window.Ui_MainWindow.camera_position_in_grid)
                         main_window.Ui_MainWindow.camera_position_in_grid[source_widget_position_in_grid] = v
@@ -43,32 +41,8 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                         self.cameras_page_gridLayout.addWidget(v.QScrollArea, source_widget_position_in_grid[0],
                                                                source_widget_position_in_grid[1])
 
-                        print(main_window.Ui_MainWindow.camera_position_in_grid)
-
-
-                        #self.cameras_page_gridLayout.removeWidget(v.QScrollArea.widget())
-                        #self.cameras_page_gridLayout.removeWidget(source_widget.QScrollArea.widget())
-
-
-                        #self.cameras_page_gridLayout.addItem(self.cameras_page_gridLayout.takeAt((0, 0)), v)
-                        #self.cameras_page_gridLayout.addItem(self.cameras_page_gridLayout.takeAt((0, 1)), source_widget)
-                        #self.cameras_page_gridLayout.addWidget(camera_func, x_pos_in_grid, y_pos_in_grid)
                         break
                 break
-
-
-
-
-        #if not event.source().geometry().contains(event.pos()):
-            #source = self.get_index(event.pos())
-            #if source is None:
-            #    return
-
-            #i, j = max(self.target, source), min(self.target, source)
-            #p1, p2 = self.gridLayout.getItemPosition(i), self.gridLayout.getItemPosition(j)
-
-            #self.gridLayout.addItem(self.gridLayout.takeAt(i), *p2)
-            #self.gridLayout.addItem(self.gridLayout.takeAt(j), *p1)
 
     def closeEvent(self, event):
         session = Session(main_window.Ui_MainWindow.engine)

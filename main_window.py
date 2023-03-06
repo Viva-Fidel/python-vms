@@ -297,7 +297,6 @@ class Ui_MainWindow(object):
         for cameras in session.query(Cam_list).all():
             if cameras.cam_type == 'rtsp':
                 self.rtsp = QTreeWidgetItem(self.settings)
-
                 self.rtsp_name = cameras.cam_name
                 self.rtsp.setText(0, self.rtsp_name)
                 self.rtsp.setData(0, Qt.UserRole, len(Ui_MainWindow.left_menu_tree_widget_list))
@@ -312,17 +311,10 @@ class Ui_MainWindow(object):
                 self.rtsp_page.rtsp_stream_url_lineEdit.setText(cameras.cam_link)
                 Ui_MainWindow.left_menu_tree_widget_list.append((self.rtsp, self.rtsp_page))
 
+
                 if cameras.cam_status == True:
 
-                    self.rtsp_page.new_camera = New_rtsp_camera(cameras.cam_link)
-                    self.rtsp_page.camera = self.rtsp_page.new_camera.add_new_camera()
-                    self.rtsp_page.new_camera.error_message.connect(self.rtsp_page.update_status_label_with_error)
-                    Ui_MainWindow.camera_position_in_grid[(int(cameras.cam_position_in_grid[1]), int(cameras.cam_position_in_grid[4]))] = self.rtsp_page.new_camera
-                    self.rtsp_page.rtsp_update_main_gui_add.emit(self.rtsp_page.camera, int(cameras.cam_position_in_grid[1]), int(cameras.cam_position_in_grid[4]))
-                    self.rtsp_page.rtsp_enable_pushButton.setText("Disable")
-                    self.rtsp_page.rtsp_actual_status_label.setText('Enabled')
-                    self.rtsp_page.new_camera.QScrollArea.installEventFilter(self)
-                    #self.rtsp_page.new_camera.QScrollArea.setAcceptDrops(True)
+                    self.rtsp_page.enable_from_db(cameras.cam_link, cameras.cam_position_in_grid)
 
                     if cameras.analytics_status == True:
                         self.rtsp_page.rtsp_run_lpr_checkBox.setChecked(True)
@@ -350,16 +342,7 @@ class Ui_MainWindow(object):
 
                 if cameras.cam_status == True:
 
-                    self.webcam_page.new_camera = New_webcamera()
-                    self.webcam_page.camera = self.webcam_page.new_camera.add_new_camera()
-                    self.webcam_page.new_camera.error_message.connect(self.webcam_page.update_status_label_with_error)
-                    Ui_MainWindow.camera_position_in_grid[(int(cameras.cam_position_in_grid[1]), int(cameras.cam_position_in_grid[4]))] = self.webcam_page.new_camera
-                    self.webcam_page.webcam_update_main_gui_add.emit(self.webcam_page.camera,
-                                                                 int(cameras.cam_position_in_grid[1]),
-                                                                 int(cameras.cam_position_in_grid[4]))
-                    self.webcam_page.webcam_enable_pushButton.setText("Disable")
-                    self.webcam_page.webcam_actual_status_label.setText('Enabled')
-                    self.webcam_page.new_camera.QScrollArea.installEventFilter(self)
+                    self.webcam_page.enable_from_db(cameras.cam_position_in_grid)
 
                     if cameras.analytics_status == True:
                         self.webcam_page.webcam_run_lpr_checkBox.setChecked(True)
@@ -679,6 +662,19 @@ class Rtsp_page(QObject):
                     self.camera_status = False
                     Ui_MainWindow.camera_position_in_grid[k] = None
                     break
+
+    def enable_from_db(self, cam_link, cam_position_in_grid):
+        self.new_camera = New_rtsp_camera(cam_link)
+        self.camera = self.new_camera.add_new_camera()
+        self.new_camera.error_message.connect(self.update_status_label_with_error)
+        Ui_MainWindow.camera_position_in_grid[(int(cam_position_in_grid[1]), int(cam_position_in_grid[4]))] = self.new_camera
+        self.rtsp_update_main_gui_add.emit(self.camera, int(cam_position_in_grid[1]), int(cam_position_in_grid[4]))
+        self.rtsp_enable_pushButton.setText("Disable")
+        self.rtsp_actual_status_label.setText('Enabled')
+        self.new_camera.QScrollArea.installEventFilter(self)
+
+
+
     @Slot(str)
     def update_status_label_with_error(self, str):
         self.rtsp_actual_status_label.setText(str)
@@ -868,6 +864,16 @@ class Webcam_page(QObject):
                     self.new_camera.QScrollArea.removeEventFilter(self)
                     break
 
+    def enable_from_db(self, cam_position_in_grid):
+        self.new_camera = New_webcamera()
+        self.camera = self.new_camera.add_new_camera()
+        self.new_camera.error_message.connect(self.update_status_label_with_error)
+        Ui_MainWindow.camera_position_in_grid[(int(cam_position_in_grid[1]), int(cam_position_in_grid[4]))] = self.new_camera
+        self.webcam_update_main_gui_add.emit(self.camera, int(cam_position_in_grid[1]), int(cam_position_in_grid[4]))
+        self.webcam_enable_pushButton.setText("Disable")
+        self.webcam_actual_status_label.setText('Enabled')
+        self.new_camera.QScrollArea.installEventFilter(self)
+
     @Slot(str)
     def update_status_label_with_error(self, str):
         self.webcam_actual_status_label.setText(str)
@@ -889,10 +895,22 @@ class Webcam_page(QObject):
             Ui_MainWindow.limit_webcam -= 1
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.MouseButtonDblClick:
-            if obj:
-                self.webcam_show_hide_camera_action.emit(self.new_camera)
+        if event.type() == QEvent.MouseButtonPress:
+            self.mousePressEvent(event)
+        elif event.type() == QEvent.MouseButtonDblClick:
+            self.webcam_show_hide_camera_action.emit(self.new_camera)
         return super().eventFilter(obj, event)
+
+    def mousePressEvent(self, event):
+        if event.buttons() & Qt.LeftButton:
+            drag = QDrag(self.new_camera)
+            pix = self.new_camera.QScrollArea.widget().grab()
+            mimedata = QMimeData()
+            mimedata.setImageData(pix)
+            drag.setMimeData(mimedata)
+            drag.setPixmap(pix)
+            drag.setHotSpot(event.pos())
+            drag.exec()
 
     def __del__(self):
         print("Webcam is deleted")
