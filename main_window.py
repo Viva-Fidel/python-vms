@@ -878,6 +878,7 @@ class Webcam_page(QObject):
     def update_status_label_with_error(self, str):
         self.webcam_actual_status_label.setText(str)
 
+
     def delete_webcam(self):
         if self.camera_status == True:
             self.new_camera.stop_camera()
@@ -886,6 +887,7 @@ class Webcam_page(QObject):
                     self.new_camera.QScrollArea.removeEventFilter(self)
                     self.webcam_update_main_gui_delete.emit(self.camera, self.webcam_page)
                     Ui_MainWindow.camera_position_in_grid[k] = None
+                    break
 
             self.webcam_left_menu_delete_page.emit(Ui_MainWindow.user_current_position_in_tree_widget_list, self.unique_id)
             Ui_MainWindow.limit_webcam -= 1

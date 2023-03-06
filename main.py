@@ -45,9 +45,12 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                 break
 
     def closeEvent(self, event):
+
+
         session = Session(main_window.Ui_MainWindow.engine)
         for i in main_window.Ui_MainWindow.left_menu_tree_widget_list:
             if i[1] != None and i[1].camera_type == 'rtsp':
+                i[1].new_camera.stop_camera()
                 cameras = session.query(Cam_list).filter_by(cam_id=i[1].unique_id).first()
                 if cameras:
                     cameras.cam_name = i[1].rtsp_device_name_lineEdit.text()
@@ -66,6 +69,7 @@ class Vms(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
                                        )
                     session.add(cameras)
             elif i[1] != None and i[1].camera_type == 'webcam':
+                i[1].new_camera.stop_camera()
                 cameras = session.query(Cam_list).filter_by(cam_id=i[1].unique_id).first()
                 if cameras:
                     cameras.cam_name = i[1].webcam_device_name_lineEdit.text()

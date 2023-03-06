@@ -40,7 +40,8 @@ class Webcamera(QThread):
             else:
                 self.CameraWorking.emit(False)
                 cap.release()
-
+        else:
+            cap.release()
 
     def run_lpr(self):
         self.lpr_analytics = True
